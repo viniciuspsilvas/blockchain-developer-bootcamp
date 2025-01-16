@@ -12,7 +12,9 @@ contract Token {
     // Track balances
     mapping(address => uint256) public balanceOf;
 
-    // Send tokens
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    // event Approval(address indexed _owner, address indexed _spender, uint256 _value)
 
     constructor(
         string memory _name,
@@ -26,5 +28,24 @@ contract Token {
         // It assign the total supply to who is creating the smart contract
         // msg.sender is the person who is deploying the smart contract
         balanceOf[msg.sender] = totalSupply;
+    }
+
+    function transfer(
+        address _to,
+        uint256 _value
+    ) public returns (bool success) {
+      
+        // Required that sender has enough tokens to spend
+        require(balanceOf[msg.sender] >= _value);
+
+        // Check if
+        require(_to != address(0));
+
+        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;
+        balanceOf[_to] = balanceOf[_to] + _value;
+
+        emit Transfer(msg.sender, _to, _value);
+
+        return true;
     }
 }
