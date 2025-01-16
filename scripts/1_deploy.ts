@@ -2,7 +2,6 @@ import { ethers } from "hardhat";
 
 async function main() {
   // Fetch contract to deploy
-
   const Token = await ethers.getContractFactory("Token")
 
   // Deploy contract
@@ -10,7 +9,6 @@ async function main() {
 
   await token.deployed()
   console.log(`Token deployed to: ${token.address}`)
-
 }
 
 // We recommend this pattern to be able to use async/await everywhere
