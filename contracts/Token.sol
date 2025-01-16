@@ -5,9 +5,14 @@ import "hardhat/console.sol";
 
 contract Token {
     string public name;
-    string public symbol ;
+    string public symbol;
     uint8 public decimals = 18;
     uint256 public totalSupply;
+
+    // Track balances
+    mapping(address => uint256) public balanceOf;
+
+    // Send tokens
 
     constructor(
         string memory _name,
@@ -17,5 +22,9 @@ contract Token {
         name = _name;
         symbol = _symbol;
         totalSupply = _totalSupply;
+
+        // It assign the total supply to who is creating the smart contract
+        // msg.sender is the person who is deploying the smart contract
+        balanceOf[msg.sender] = totalSupply;
     }
 }
