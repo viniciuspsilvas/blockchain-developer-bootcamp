@@ -8,6 +8,9 @@ dotenv.config();  // Load environment variables from .env file
 
 const config: HardhatUserConfig = {
   solidity: "0.8.28",
+  networks: {
+    localhost: {}
+  }
 };
 
 export default config;
