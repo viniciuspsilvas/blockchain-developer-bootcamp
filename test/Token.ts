@@ -13,6 +13,8 @@ describe("Token", () => {
     let token: Token;
     let deployer: SignerWithAddress;
     let receiver: SignerWithAddress;
+    let exchange: SignerWithAddress;
+    const invalidAddress: string = '0x0000000000000000000000000000000000000000';
 
     beforeEach(async () => {
         const Token = await ethers.getContractFactory("Token");
@@ -21,6 +23,7 @@ describe("Token", () => {
         const accounts = await ethers.getSigners();
         deployer = accounts[0];
         receiver = accounts[1];
+        exchange = accounts[2];
     });
 
     describe("Deployment", () => {
@@ -90,13 +93,47 @@ describe("Token", () => {
             })
 
             it("rejects invalid recipient", async () => {
-                amount = tokens(100); 
-                await expect(token.connect(deployer).transfer("0x00000", amount)).to.be.rejected
+                amount = tokens(100);
+                await expect(token.connect(deployer).transfer(invalidAddress, amount)).to.be.rejected
             })
         })
     });
 
-    describe("Approving", () => {
-        // Add tests for approving if needed
-    });
+    describe('Approving Tokens', () => {
+        let amount: BigNumber;
+        let transaction;
+        let result: ContractReceipt | undefined;
+
+        beforeEach(async () => {
+            amount = tokens(100)
+            transaction = await token.connect(deployer).approve(exchange.address, amount)
+            result = await transaction.wait()
+        })
+
+        describe('Success', () => {
+            it('allocates an allowance for delegated token spending', async () => {
+                expect(await token.allowance(deployer.address, exchange.address)).to.equal(amount)
+            })
+
+            it("emits a Approval event", async () => {
+                const event: Event | undefined = result?.events?.find((e) => e.event === "Approval");
+
+                expect(event?.event).to.equal("Approval");
+
+                const args: Result | undefined = event?.args;
+
+                expect(args?.owner).to.equal(deployer.address);
+                expect(args?.spender).to.equal(exchange.address);
+                expect(args?.value).to.equal(amount);
+            });
+
+        })
+
+        describe('Failure', () => {
+            it('rejects invalid spenders', async () => {
+                await expect(token.connect(deployer).approve(invalidAddress, amount)).to.be.reverted
+            })
+        })
+
+    })
 });
