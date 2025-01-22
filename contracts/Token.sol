@@ -12,9 +12,9 @@ contract Token {
     // Track balances
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
- 
+
     event Transfer(address indexed from, address indexed to, uint256 value);
- 
+
     event Approval(
         address indexed owner,
         address indexed spender,
@@ -28,7 +28,7 @@ contract Token {
     ) {
         name = _name;
         symbol = _symbol;
-        totalSupply = _totalSupply;
+        totalSupply = _totalSupply * (10**decimals);
 
         // It assign the total supply to who is creating the smart contract
         // msg.sender is the person who is deploying the smart contract
@@ -42,15 +42,17 @@ contract Token {
         // Required that sender has enough tokens to spend
         require(balanceOf[msg.sender] >= _value);
 
-        // Check if
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+
+    function _transfer(address _from, address _to, uint256 _value) internal {
         require(_to != address(0));
 
-        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;
+        balanceOf[_from] = balanceOf[_from] - _value;
         balanceOf[_to] = balanceOf[_to] + _value;
 
-        emit Transfer(msg.sender, _to, _value);
-
-        return true;
+        emit Transfer(_from, _to, _value);
     }
 
     function approve(
@@ -62,6 +64,24 @@ contract Token {
         allowance[msg.sender][_spender] = _value;
 
         emit Approval(msg.sender, _spender, _value);
+        return true;
+    }
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) public returns (bool success) {
+
+        require(_value <= balanceOf[_from]);
+        require(_value <= allowance[_from][msg.sender]);
+
+        // reset allowance
+        allowance[_from][msg.sender] = allowance[_from][msg.sender] - _value;
+
+        // Spend tokens
+        _transfer(_from, _to, _value);
+
         return true;
     }
 }
