@@ -28,7 +28,7 @@ contract Token {
     ) {
         name = _name;
         symbol = _symbol;
-        totalSupply = _totalSupply * (10**decimals);
+        totalSupply = _totalSupply * (10 ** decimals);
 
         // It assign the total supply to who is creating the smart contract
         // msg.sender is the person who is deploying the smart contract
@@ -72,9 +72,11 @@ contract Token {
         address _to,
         uint256 _value
     ) public returns (bool success) {
-
-        require(_value <= balanceOf[_from]);
-        require(_value <= allowance[_from][msg.sender]);
+        require(_value <= balanceOf[_from], "insufficient balance");
+        require(
+            _value <= allowance[_from][msg.sender],
+            "insufficient allowance"
+        );
 
         // reset allowance
         allowance[_from][msg.sender] = allowance[_from][msg.sender] - _value;

@@ -1,7 +1,7 @@
 import { Token } from "@/typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber, ContractReceipt, Event } from "ethers";
+import { BigNumber, ContractReceipt, ContractTransaction, Event } from "ethers";
 import { Result } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -55,7 +55,7 @@ describe("Token", () => {
 
     describe("Sending tokens", () => {
         let amount: BigNumber;
-        let transaction;
+        let transaction: ContractTransaction;
         let result: ContractReceipt | undefined;
 
         describe("Success", () => {
