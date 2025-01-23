@@ -1,0 +1,7 @@
+{
+    "watch": ["contracts", "test"],
+    "ext": "ts,js,sol",
+    "exec": "npx hardhat test",
+    "ignore": ["node_modules", "artifacts", "cache"]
+  }
+  
