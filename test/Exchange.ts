@@ -1,7 +1,8 @@
 import { Exchange, Token } from "@/typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber, ContractReceipt, ContractTransaction } from "ethers";
+import { BigNumber, ContractReceipt, ContractTransaction, Event } from "ethers";
+import { Result } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 const tokens = (n: number) => {
@@ -10,8 +11,9 @@ const tokens = (n: number) => {
 
 describe("Exchange", () => {
     let exchange: Exchange;
-    let deployer: SignerWithAddress;
     let feeAccount: SignerWithAddress;
+
+    let deployer: SignerWithAddress;
     let user1: SignerWithAddress;
 
     let token1: Token;
@@ -19,21 +21,31 @@ describe("Exchange", () => {
     const feePercent = 10
 
     beforeEach(async () => {
+        // Get the contract factories for Exchange and Token contracts.
         const Exchange = await ethers.getContractFactory("Exchange");
         const Token = await ethers.getContractFactory("Token");
 
+        // Deploy the Token contract
         token1 = await Token.deploy("Dapp University", "DAPP", 1000000);
 
+        // Retrieve a list of test accounts provided by Hardhat.
         const accounts = await ethers.getSigners();
-        deployer = accounts[0];
-        feeAccount = accounts[1];
+        deployer = accounts[0]; // The account deploying the contracts (msg.sender for deploys).
+        feeAccount = accounts[1]; // Account designated to collect fees on the Exchange.
+        user1 = accounts[2]; // A user account interacting with the system.
 
-        user1 = accounts[2]
+        // Transfer 100 DAPP tokens from deployer to user1.
+        // - Connect as the deployer (msg.sender = deployer).
+        // - Use the transfer function of the Token contract.
         const transaction = await token1.connect(deployer).transfer(user1.address, tokens(100));
-        await transaction.wait()
+        await transaction.wait(); // Wait for the transaction to be mined.
 
+        // Deploy the Exchange contract with:
+        // - feeAccount as the address to collect trading fees.
+        // - feePercent as the fee percentage (e.g., 10%).
         exchange = await Exchange.deploy(feeAccount.address, feePercent);
     });
+
 
     describe("Deployment", () => {
         it("tracks the fee account", async () => {
@@ -51,27 +63,42 @@ describe("Exchange", () => {
         let transaction: ContractTransaction;
         let result: ContractReceipt | undefined;
 
-        beforeEach(async () => {
-            // Approve token
-            transaction = await token1.connect(user1).approve(exchange.address, amount);
-            result = await transaction.wait()
-
-            // Deposit token
-            transaction = await exchange.connect(user1).depositToken(token1.address, amount);
-            result = await transaction.wait()
-        });
-
         describe('Success', () => {
+            beforeEach(async () => {
+                // Approve token
+                // Grants the Exchange contract permission to spend up to amount tokens owned by user1
+                transaction = await token1.connect(user1).approve(exchange.address, amount);
+                result = await transaction.wait()
+
+                // Deposit token
+                //move tokens from user1's wallet to the Exchange contract's address.
+                transaction = await exchange.connect(user1).depositToken(token1.address, amount);
+                result = await transaction.wait()
+            });
+
             it("Tracks the token deposit", async () => {
                 expect(await token1.balanceOf(exchange.address)).to.equal(amount)
                 expect(await exchange.tokens(token1.address, user1.address)).to.equal(amount)
+                expect(await exchange.balanceOf(token1.address, user1.address)).to.equal(amount)
+            })
 
+            it('emits a Deposit event', async () => {
+                const event: Event | undefined = result?.events?.find((e) => e.event === "Deposit");
+                expect(event?.event).to.equal("Deposit");
+
+                const args: Result | undefined = event?.args;
+                expect(args?.token).to.equal(token1.address);
+                expect(args?.user).to.equal(user1.address);
+                expect(args?.amount).to.equal(amount);
+                expect(args?.balance).to.equal(amount);
             })
         })
 
- 
-        describe('Failure', () => {
 
+        describe('Failure', () => {
+            it("fails when no tokens are approved", async () => {
+                await expect(exchange.connect(user1).depositToken(token1.address, amount)).to.be.reverted
+            })
         })
     })
 
