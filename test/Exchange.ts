@@ -17,6 +17,7 @@ describe("Exchange", () => {
     let user1: SignerWithAddress;
 
     let token1: Token;
+    let token2: Token;
 
     const feePercent = 10
 
@@ -27,6 +28,7 @@ describe("Exchange", () => {
 
         // Deploy the Token contract
         token1 = await Token.deploy("Dapp University", "DAPP", 1000000);
+        token2 = await Token.deploy("Mock Dai", "mDAI", 1000000);
 
         // Retrieve a list of test accounts provided by Hardhat.
         const accounts = await ethers.getSigners();
@@ -167,6 +169,57 @@ describe("Exchange", () => {
 
         it("returns user balances", async () => {
             expect(await token1.balanceOf(exchange.address)).to.equal(amount)
+        })
+    })
+
+    describe("Making orders", () => {
+        let transaction: ContractTransaction;
+        let result: ContractReceipt | undefined;
+        const amount: BigNumber = tokens(1);
+
+        describe('Success', () => {
+            beforeEach(async () => {
+
+                // Deposit tokens before making order
+
+                // Approve token
+                // Grants the Exchange contract permission to spend up to amount tokens owned by user1
+                transaction = await token1.connect(user1).approve(exchange.address, amount);
+                result = await transaction.wait()
+
+                // Deposit token
+                //move tokens from user1's wallet to the Exchange contract's address.
+                transaction = await exchange.connect(user1).depositToken(token1.address, amount);
+                result = await transaction.wait()
+
+                // Make order
+                transaction = await exchange.connect(user1).makeOrder(token2.address, amount, token1.address, amount);
+                result = await transaction.wait()
+            });
+
+            it("tracks the newly created order", async () => {
+                expect(await exchange.orderCount()).to.equal(1)
+            })
+
+            it('emits an Order event', async () => {
+                const event: Event | undefined = result?.events?.find((e) => e.event === "Order");
+                expect(event?.event).to.equal("Order");
+
+                const args: Result | undefined = event?.args;
+                expect(args?.id).to.equal(1);
+                expect(args?.user).to.equal(user1.address);
+                expect(args?.tokenGet).to.equal(token2.address);
+                expect(args?.amountGet).to.equal(amount);
+                expect(args?.tokenGive).to.equal(token1.address);
+                expect(args?.amountGive).to.equal(amount);
+                expect(args?.timestamp).to.at.least(1)
+            })
+        })
+
+        describe('Failure', () => {
+            it("rejects with no balance", async () => {
+                await expect(exchange.connect(user1).makeOrder(token2.address, amount, token1.address, amount)).to.be.reverted;
+            })
         })
     })
 });
