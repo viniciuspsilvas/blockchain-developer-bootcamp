@@ -15,6 +15,7 @@ describe("Exchange", () => {
 
     let deployer: SignerWithAddress;
     let user1: SignerWithAddress;
+    let user2: SignerWithAddress;
 
     let token1: Token;
     let token2: Token;
@@ -35,6 +36,7 @@ describe("Exchange", () => {
         deployer = accounts[0]; // The account deploying the contracts (msg.sender for deploys).
         feeAccount = accounts[1]; // Account designated to collect fees on the Exchange.
         user1 = accounts[2]; // A user account interacting with the system.
+        user2 = accounts[3]; 
 
         // Transfer 100 DAPP tokens from deployer to user1.
         // - Connect as the deployer (msg.sender = deployer).
@@ -219,6 +221,79 @@ describe("Exchange", () => {
         describe('Failure', () => {
             it("rejects with no balance", async () => {
                 await expect(exchange.connect(user1).makeOrder(token2.address, amount, token1.address, amount)).to.be.reverted;
+            })
+        })
+    })
+
+    describe("Orders actions", () => {
+        let transaction: ContractTransaction;
+        let result: ContractReceipt | undefined;
+        const amount: BigNumber = tokens(1);
+
+        beforeEach(async () => {
+            // user1 deposits tokens
+            transaction = await token1.connect(user1).approve(exchange.address, amount);
+            result = await transaction.wait()
+
+            transaction = await exchange.connect(user1).depositToken(token1.address, amount);
+            result = await transaction.wait()
+
+            // Make order
+            transaction = await exchange.connect(user1).makeOrder(token2.address, amount, token1.address, amount);
+            result = await transaction.wait()
+        });
+
+
+        describe("Cancelling actions", async () => {
+            describe("Success", async () => {
+                beforeEach(async () => {
+                    // user1 deposits tokens
+                    transaction = await exchange.connect(user1).cancelOrder(1);
+                    result = await transaction.wait()
+
+                });
+
+                describe("updates canceled orders", async () => {
+                    expect(await exchange.ordersCancelled(1)).to.equal(true)
+                })
+
+                it('emits an Cancel event', async () => {
+                    const event: Event | undefined = result?.events?.find((e) => e.event === "Cancel");
+                    expect(event?.event).to.equal("Cancel");
+
+                    const args: Result | undefined = event?.args;
+                    expect(args?.id).to.equal(1);
+                    expect(args?.user).to.equal(user1.address);
+                    expect(args?.tokenGet).to.equal(token2.address);
+                    expect(args?.amountGet).to.equal(amount);
+                    expect(args?.tokenGive).to.equal(token1.address);
+                    expect(args?.amountGive).to.equal(amount);
+                    expect(args?.timestamp).to.at.least(1)
+                })
+            })
+
+            describe("Failure", () => {
+                beforeEach(async () => {
+                    // user1 deposits tokens
+                    transaction = await token1.connect(user1).approve(exchange.address, amount);
+                    result = await transaction.wait()
+
+                    transaction = await exchange.connect(user1).depositToken(token1.address, amount);
+                    result = await transaction.wait()
+
+                    // Make order
+                    transaction = await exchange.connect(user1).makeOrder(token2.address, amount, token1.address, amount);
+                    result = await transaction.wait()
+                });
+
+                it("rejects invalid orders id", async () => {
+                    const invalidOrderId = 999999
+                    await expect(exchange.connect(user1).cancelOrder(invalidOrderId)).to.be.reverted;
+                })
+
+                it("rejects unauthorized cancelations", async () => {
+                    await expect(exchange.connect(user2).cancelOrder(1)).to.be.reverted;
+                })
             })
         })
     })
