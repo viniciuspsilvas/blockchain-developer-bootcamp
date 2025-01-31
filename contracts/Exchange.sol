@@ -5,16 +5,22 @@ import "hardhat/console.sol";
 import "./Token.sol";
 
 contract Exchange {
-    address public feeAccount;
-    uint256 public feePercent;
+    address public feeAccount; // Account that receives exchange fees
+    uint256 public feePercent; // Fee percentage charged on trades
 
+    // Token balances for users (tokenAddress => (userAddress => balance))
     mapping(address => mapping(address => uint256)) public tokens;
+
+    // Orders mapping (orderId => Order struct)
     mapping(uint256 => _Order) public orders;
-    mapping(uint256 => bool) public ordersCancelled; // true or false
+
+    // Track canceled and filled orders
+    mapping(uint256 => bool) public ordersCancelled;
     mapping(uint256 => bool) public ordersFilled;
 
-    uint256 public orderCount;
+    uint256 public orderCount; // Counter for order IDs
 
+    // Events for logging deposits, withdrawals, and trades
     event Deposit(address token, address user, uint256 amount, uint256 balance);
     event Withdraw(
         address token,
@@ -22,7 +28,6 @@ contract Exchange {
         uint256 amount,
         uint256 balance
     );
-
     event Order(
         uint256 id,
         address user,
@@ -32,7 +37,6 @@ contract Exchange {
         uint256 amountGive,
         uint256 timestamp
     );
-
     event Cancel(
         uint256 id,
         address user,
@@ -42,7 +46,6 @@ contract Exchange {
         uint256 amountGive,
         uint256 timestamp
     );
-
     event Trade(
         uint256 id,
         address user,
@@ -54,7 +57,6 @@ contract Exchange {
         uint256 timestamp
     );
 
-    // A way to model the order
     struct _Order {
         // Attributes of an order
         uint256 id; // Unique identifier for order
@@ -71,34 +73,38 @@ contract Exchange {
         feePercent = _feePercent;
     }
 
-    // Deposit Tokens
     function depositToken(address _token, uint256 _amount) public {
         // Transfer tokens to exchange
-        require(Token(_token).transferFrom(msg.sender, address(this), _amount));
+        require(_amount > 0, "Deposit amount must be greater than zero");
+        require(
+            Token(_token).transferFrom(msg.sender, address(this), _amount),
+            "Token transfer failed"
+        );
 
         // Update user balance
-        tokens[_token][msg.sender] = tokens[_token][msg.sender] + _amount;
-
-        // Emit an event
+        tokens[_token][msg.sender] += _amount;
         emit Deposit(_token, msg.sender, _amount, tokens[_token][msg.sender]);
     }
 
-    // Withdraw tokens
     function withdrawToken(address _token, uint256 _amount) public {
         // Ensure user has enough tokens to withdraw
-        require(tokens[_token][msg.sender] >= _amount);
+        require(
+            _amount > 0 && tokens[_token][msg.sender] >= _amount,
+            "Insufficient balance"
+        );
 
         // Transfer tokens from exchange to user
-        Token(_token).transfer(msg.sender, _amount);
+        require(
+            Token(_token).transfer(msg.sender, _amount),
+            "Token transfer failed"
+        );
 
         // Update user balance
-        tokens[_token][msg.sender] = tokens[_token][msg.sender] - _amount;
+        tokens[_token][msg.sender] -= _amount;
 
-        // Emit an event
         emit Withdraw(_token, msg.sender, _amount, tokens[_token][msg.sender]);
     }
 
-    // Check Balances
     function balanceOf(
         address _token,
         address _user
@@ -106,7 +112,6 @@ contract Exchange {
         return tokens[_token][_user];
     }
 
-    // Make & Cancel orders
     function makeOrder(
         address _tokenGet,
         uint256 _amountGet,
@@ -114,7 +119,10 @@ contract Exchange {
         uint256 _amountGive
     ) public {
         // Prevent orders if tokens aren't on exchange
-        require(balanceOf(_tokenGive, msg.sender) >= _amountGive);
+        require(
+            balanceOf(_tokenGive, msg.sender) >= _amountGive,
+            "Insufficient token balance"
+        );
 
         //  Initialize an order
         orderCount++;
@@ -127,8 +135,6 @@ contract Exchange {
             _amountGive,
             block.timestamp
         );
-
-        // Emit event
         emit Order(
             orderCount,
             msg.sender,
@@ -145,15 +151,16 @@ contract Exchange {
         _Order storage _order = orders[_id];
 
         // Ensure the caller of the function is the owner of the order
-        require(address(_order.user) == msg.sender);
+        require(
+            _order.user == msg.sender,
+            "Unauthorized: Only order creator can cancel"
+        );
 
         // Order must exist
-        require(_order.id == _id);
+        require(_order.id == _id, "Invalid order ID");
 
         // cancel order
         ordersCancelled[_id] = true;
-
-        // Emit event
         emit Cancel(
             _order.id,
             msg.sender,
@@ -170,10 +177,10 @@ contract Exchange {
         require(_id > 0 && _id <= orderCount, "Order does not exist");
 
         // 2. Order can't be filled
-        require(!ordersFilled[_id]);
-
-        // 3. Order can't be cancelled
-        require(!ordersCancelled[_id]);
+        require(
+            !ordersFilled[_id] && !ordersCancelled[_id],
+            "Order already filled or cancelled"
+        );
 
         // Fetch order
         _Order storage _order = orders[_id];
@@ -189,7 +196,7 @@ contract Exchange {
         );
 
         // Mark order as filled
-        ordersFilled[_order.id] = true;
+        ordersFilled[_id] = true;
     }
 
     function _trade(
@@ -208,18 +215,14 @@ contract Exchange {
         // msg.sender is the user2, that one who is filling / completing the order
         // while _user is who created the order
         tokens[_tokenGet][msg.sender] -= (_amountGet + _feeAmount);
-
         tokens[_tokenGet][_user] += _amountGet;
-
         // Charge fees
         tokens[_tokenGet][feeAccount] += _feeAmount;
 
         tokens[_tokenGive][_user] -= _amountGive;
         tokens[_tokenGive][msg.sender] += _amountGive;
-
-        // Emit trade event
         emit Trade(
-            orderCount,
+            _orderId, // orderCount was like that, but chatGPT change to  _orderId
             msg.sender,
             _tokenGet,
             _amountGet,
