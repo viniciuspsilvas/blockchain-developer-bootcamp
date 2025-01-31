@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "test": "npx hardhat test",
-    "test:watch": "nodemon"
+    "test:watch": "nodemon",
+    "hardhat:node": "npx hardhat node",
+    "hardhat:deploy": "npx hardhat run --network localhost scripts/1_deploy.ts",
+    "hardhat:seed": "npx hardhat run --network localhost scripts/2_seed-exchange.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
