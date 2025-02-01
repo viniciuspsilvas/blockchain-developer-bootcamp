@@ -3,9 +3,16 @@
 import { ethers } from "ethers";
 import configData from "../config.json";
 import TOKEN_ABI from "../abis/Token.json";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch } from "../lib/hooks";
 import { loadProvider } from "../lib/features/providers/providerSlice";
+
+declare global {
+  interface Window { 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ethereum?: any;
+  }
+}
 
 type ConfigType = {
   [key: string]: {
@@ -21,39 +28,38 @@ const config: ConfigType = configData;
 export default function Home() {
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    console.log("Iniciando");
+  useEffect(
+    () => {
+      if (typeof window === "undefined") return; // Garante que não roda no SSR
 
-    const loadBlockchainData = async () => {
-      // @ts-expect-error: Unreachable code error
-      if (typeof window !== "undefined") {
-        // @ts-expect-error: Unreachable code error
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts"
-        });
-        console.log(accounts[0]);
+      const loadBlockchainData = async () => {
+        try {
+          if (!window.ethereum) {
+            console.error("MetaMask não detectado");
+            return;
+          }
 
-        // Connect Ethers to blockchain
-        // @ts-expect-error: Unreachable code  error
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const { chainId, name } = await provider.getNetwork();
-        console.log(`Network: ${chainId} ${name}`);
+          const ethereum = window.ethereum;
+          const accounts = await ethereum.request({
+            method: "eth_requestAccounts"
+          });
 
-        // Token Smart Contract
-        const token = new ethers.Contract(
-          config[chainId].DApp.address,
-          TOKEN_ABI,
-          provider
-        );
-        console.log(`${token.address}`);
-        const symbol = await token.symbol();
-        console.log(symbol);
+          console.log(accounts[0]);
 
-        dispatch(loadProvider(provider));
-      }
-    };
-    loadBlockchainData();
-  }, []);
+          const web3Provider = new ethers.providers.Web3Provider(ethereum);
+          const network = await web3Provider.getNetwork();
+          console.log(`Network: ${network.chainId} ${network.name}`);
+
+          dispatch(loadProvider(web3Provider));
+        } catch (error) {
+          console.error("Erro ao carregar blockchain data:", error);
+        }
+      };
+
+      loadBlockchainData();
+    },
+    [dispatch]
+  );
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">

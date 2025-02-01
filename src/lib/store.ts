@@ -3,14 +3,18 @@ import provider from './features/providers/providerSlice'
 
 
 const reducers = combineReducers({
-    provider,
-  })
-  
+  provider,
+})
+
 
 export const makeStore = () => {
   return configureStore({
     reducer: reducers,
-    devTools: process.env.NODE_ENV !== 'production'
+    devTools: process.env.NODE_ENV !== 'production',
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: false, // Permite valores não serializáveis
+      }),
   })
 }
 
