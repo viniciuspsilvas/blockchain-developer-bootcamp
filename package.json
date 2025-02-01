@@ -14,6 +14,7 @@
     "hardhat:seed": "npx hardhat run --network localhost scripts/2_seed-exchange.ts"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.5.1",
     "dotenv": "^16.4.7",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
@@ -22,10 +23,7 @@
     "react-apexcharts": "^1.3.9",
     "react-blockies": "^1.4.1",
     "react-dom": "^19.0.0",
-    "react-redux": "^7.2.6",
-    "redux": "^4.1.2",
-    "redux-devtools-extension": "^2.13.9",
-    "redux-thunk": "^2.4.1",
+    "react-redux": "^9.2.0",
     "reselect": "^4.1.5"
   },
   "devDependencies": {
@@ -48,8 +46,8 @@
     "chai": "4.3.6",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
-    "ethers": "5.7.2",
     "ethereum-waffle": "^3.4.0",
+    "ethers": "5.7.2",
     "hardhat": "2.19.4",
     "hardhat-gas-reporter": "^1.0.8",
     "nodemon": "^3.1.9",

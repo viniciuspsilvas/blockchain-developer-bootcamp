@@ -4,6 +4,8 @@ import { ethers } from "ethers";
 import configData from "../config.json";
 import TOKEN_ABI from "../abis/Token.json";
 import { useEffect } from "react";
+import { useAppDispatch } from "../lib/hooks";
+import { loadProvider } from "../lib/features/providers/providerSlice";
 
 type ConfigType = {
   [key: string]: {
@@ -17,6 +19,8 @@ type ConfigType = {
 const config: ConfigType = configData;
 
 export default function Home() {
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
     console.log("Iniciando");
 
@@ -44,6 +48,8 @@ export default function Home() {
         console.log(`${token.address}`);
         const symbol = await token.symbol();
         console.log(symbol);
+
+        dispatch(loadProvider(provider));
       }
     };
     loadBlockchainData();
