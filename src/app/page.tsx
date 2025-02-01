@@ -3,12 +3,17 @@
 import { ethers } from "ethers";
 import configData from "../config.json";
 import TOKEN_ABI from "../abis/Token.json";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAppDispatch } from "../lib/hooks";
-import { loadProvider } from "../lib/features/providers/providerSlice";
+import {
+  loadAccount,
+  loadNetwork,
+  loadProvider
+} from "../lib/features/providers/providerSlice";
+import { loadToken } from "../lib/features/tokens/tokenSlice";
 
 declare global {
-  interface Window { 
+  interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ethereum?: any;
   }
@@ -35,7 +40,7 @@ export default function Home() {
       const loadBlockchainData = async () => {
         try {
           if (!window.ethereum) {
-            console.error("MetaMask não detectado");
+            console.error("MetaMask not detected");
             return;
           }
 
@@ -44,15 +49,36 @@ export default function Home() {
             method: "eth_requestAccounts"
           });
 
-          console.log(accounts[0]);
+          // Connect Ethers to blockchain
+          const provider = new ethers.providers.Web3Provider(ethereum);
+          const { chainId } = await provider.getNetwork();
+          // console.log(`Network: ${network.chainId} ${network.name}`);
 
-          const web3Provider = new ethers.providers.Web3Provider(ethereum);
-          const network = await web3Provider.getNetwork();
-          console.log(`Network: ${network.chainId} ${network.name}`);
+          // accounts[0] is the Metamask Original but I dont know why
+          const account: string = accounts[0]; // TODO accounts[0]
+          dispatch(loadAccount(ethers.utils.getAddress(account)));
 
-          dispatch(loadProvider(web3Provider));
+          dispatch(loadProvider(provider));
+          dispatch(loadNetwork(chainId));
+
+          // Token Smart Contract
+          const token = new ethers.Contract(
+            config[chainId].DApp.address,
+            TOKEN_ABI,
+            provider
+          );
+
+          dispatch(
+            loadToken({
+              symbol: await token.symbol(),
+              contract: await token
+            })
+          );
+
+          const symbol = await token.symbol();
+          console.log(`symbol: ${symbol}`);
         } catch (error) {
-          console.error("Erro ao carregar blockchain data:", error);
+          console.error("Error while loading blockchain data:", error);
         }
       };
 

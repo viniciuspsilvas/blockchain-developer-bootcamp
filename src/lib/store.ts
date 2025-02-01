@@ -1,9 +1,10 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import provider from './features/providers/providerSlice'
+import token from './features/tokens/tokenSlice'
 
 
 const reducers = combineReducers({
-  provider,
+  provider, token
 })
 
 
