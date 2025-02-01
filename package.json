@@ -49,6 +49,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
     "ethers": "5.7.2",
+    "ethereum-waffle": "^3.4.0",
     "hardhat": "2.19.4",
     "hardhat-gas-reporter": "^1.0.8",
     "nodemon": "^3.1.9",
