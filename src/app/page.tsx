@@ -3,6 +3,7 @@
 import { ethers } from "ethers";
 import configData from "../config.json";
 import TOKEN_ABI from "../abis/Token.json";
+import EXCHANGE_ABI from "../abis/Exchange.json";
 import { useEffect } from "react";
 import { useAppDispatch } from "../lib/hooks";
 import {
@@ -10,7 +11,8 @@ import {
   loadNetwork,
   loadProvider
 } from "../lib/features/providers/providerSlice";
-import { loadToken } from "../lib/features/tokens/tokenSlice";
+import { loadTokens } from "../lib/features/tokens/tokenSlice";
+import { loadExchange } from "../lib/features/exchanges/exchangeSlice";
 
 declare global {
   interface Window {
@@ -62,21 +64,38 @@ export default function Home() {
           dispatch(loadNetwork(chainId));
 
           // Token Smart Contract
-          const token = new ethers.Contract(
+          const DAppToken = new ethers.Contract(
             config[chainId].DApp.address,
             TOKEN_ABI,
             provider
           );
 
+          const mETHToken = new ethers.Contract(
+            config[chainId].mETH.address,
+            TOKEN_ABI,
+            provider
+          );
+
+          const dApp = await DAppToken;
+          const dAppSymbol: string = await dApp.symbol();
+
+          const mETH = await mETHToken;
+          const mETHSymbol: string = await mETH.symbol();
+
           dispatch(
-            loadToken({
-              symbol: await token.symbol(),
-              contract: await token
+            loadTokens({
+              symbols: [dAppSymbol, mETHSymbol],
+              contracts: [dApp, mETH]
             })
           );
 
-          const symbol = await token.symbol();
-          console.log(`symbol: ${symbol}`);
+          const exchange = new ethers.Contract(
+            config[chainId].exchange.address,
+            EXCHANGE_ABI,
+            provider
+          );
+
+          dispatch(loadExchange({ contract: exchange }));
         } catch (error) {
           console.error("Error while loading blockchain data:", error);
         }

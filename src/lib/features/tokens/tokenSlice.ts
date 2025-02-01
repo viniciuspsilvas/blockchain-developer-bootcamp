@@ -3,9 +3,9 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 // Define a type for the slice state
 interface TokenState {
-  symbol?: string
-  contract?: unknown
-  loaded: boolean
+  symbols?: string[]
+  contracts?: unknown[]
+  loaded?: boolean
 }
 
 // Define the initial state using that type
@@ -17,14 +17,14 @@ export const TokenSlice = createSlice({
   name: 'Token',
   initialState,
   reducers: {
-    loadToken: (state, { payload: { symbol, contract } }: PayloadAction<{ symbol: string, contract: unknown }>) => {
-      state.symbol = symbol
-      state.contract = contract
+    loadTokens: (state, { payload: { symbols, contracts } }: PayloadAction<TokenState>) => {
+      state.symbols = symbols
+      state.contracts = contracts
       state.loaded = true
     },
   },
 })
 
-export const { loadToken } = TokenSlice.actions
+export const { loadTokens } = TokenSlice.actions
 
 export default TokenSlice.reducer
