@@ -96,9 +96,28 @@ export default function Home() {
           );
 
           dispatch(loadExchange({ contract: exchange }));
+
+          // Fetch current account & balance from Metamask when changed
+          window.ethereum.on("accountsChanged", async (_accounts: string[]) => {
+            const _account = _accounts[0];
+            dispatch(loadAccount(ethers.utils.getAddress(_account)));
+            const _balance = ethers.utils.formatEther(
+              await provider.getBalance(_account)
+            );
+
+            dispatch(loadBalance(_balance));
+          });
         } catch (error) {
           console.error("Error while loading blockchain data:", error);
         }
+
+        // Reload page when network changes
+        window.ethereum.on("chainChanged", () => {
+          console.log("chainChanged");
+          window.location.reload();
+        });
+
+        
       };
 
       loadBlockchainData();
