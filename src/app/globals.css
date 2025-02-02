@@ -7,6 +7,23 @@
   --foreground: #171717;
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ------------------------------------------------------ */
+
+html {
+  font-family: "DM Sans";
+  color: var(--clr-white);
+}
+
+main {
+  min-height: 100vh;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -18,4 +35,47 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ------------------------------------------------------ */
+/* -- Text -- */
+
+h1 {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 500;
+}
+
+h2 {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  margin: 0.375em 0;
+
+  font-weight: 500;
+  font-size: clamp(0.95rem, 2vw, 1.10rem);
+}
+
+p,
+small {
+  font-weight: 400;
+}
+
+small {
+  color: var(--clr-neutral);
+}
+
+
+ select {
+  background: transparent;
+  color: var(--clr-white);
+  border: none;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+ select:focus {
+  background: var(--clr-secondary);
 }

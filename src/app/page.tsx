@@ -1,19 +1,21 @@
 "use client";
 
 import { ethers } from "ethers";
-import configData from "../config.json";
 import TOKEN_ABI from "../abis/Token.json";
 import EXCHANGE_ABI from "../abis/Exchange.json";
 import { useEffect } from "react";
 import { useAppDispatch } from "../lib/hooks";
 import {
   loadAccount,
+  loadBalance,
   loadNetwork,
   loadProvider
 } from "../lib/features/providers/providerSlice";
 import { loadTokens } from "../lib/features/tokens/tokenSlice";
 import { loadExchange } from "../lib/features/exchanges/exchangeSlice";
 
+import configData from "../config.json";
+import { Navbar } from "../components/navbar";
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,7 +32,7 @@ type ConfigType = {
   };
 };
 
-const config: ConfigType = configData;
+export const config: ConfigType = configData;
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -52,18 +54,19 @@ export default function Home() {
           });
 
           // Connect Ethers to blockchain
+          const account = ethers.utils.getAddress(accounts[0]);
           const provider = new ethers.providers.Web3Provider(ethereum);
           const { chainId } = await provider.getNetwork();
-          // console.log(`Network: ${network.chainId} ${network.name}`);
+          const balance = ethers.utils.formatEther(
+            await provider.getBalance(account)
+          );
 
-          // accounts[0] is the Metamask Original but I dont know why
-          const account: string = accounts[0]; // TODO accounts[0]
-          dispatch(loadAccount(ethers.utils.getAddress(account)));
-
+          dispatch(loadAccount(account));
           dispatch(loadProvider(provider));
-          dispatch(loadNetwork(chainId));
+          dispatch(loadNetwork(`${chainId}`));
+          dispatch(loadBalance(balance));
 
-          // Token Smart Contract
+          // Token Smart Contracts
           const DAppToken = new ethers.Contract(
             config[chainId].DApp.address,
             TOKEN_ABI,
@@ -76,16 +79,13 @@ export default function Home() {
             provider
           );
 
-          const dApp = await DAppToken;
-          const dAppSymbol: string = await dApp.symbol();
-
-          const mETH = await mETHToken;
-          const mETHSymbol: string = await mETH.symbol();
+          const dAppSymbol: string = await DAppToken.symbol();
+          const mETHSymbol: string = await mETHToken.symbol();
 
           dispatch(
             loadTokens({
               symbols: [dAppSymbol, mETHSymbol],
-              contracts: [dApp, mETH]
+              contracts: [DAppToken, mETHToken]
             })
           );
 
@@ -107,25 +107,25 @@ export default function Home() {
   );
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      {/* Navbar */}
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        MAIN
-        <section className="exchange__section--left grid">
+    <div className="min-h-screen font-dm-sans text-white bg-primary">
+      <Navbar />
+
+      <main className="grid grid-cols-12 ">
+        {/* Left Section */}
+        <section className="grid bg-secondary p-8 col-span-12">
           {/* Markets */}
           {/* Balance */}
           {/* Order */}
         </section>
-        <section className="exchange__section--right grid">
+        {/* Right Section */}
+        <section className="grid ">
           {/* PriceChart */}
           {/* Transactions */}
           {/* Trades */}
           {/* OrderBook */}
         </section>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        FOOTER
-      </footer>
+
       {/* Alert */}
     </div>
   );

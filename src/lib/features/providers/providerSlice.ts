@@ -6,8 +6,9 @@ import { ethers } from 'ethers'
 // Define a type for the slice state
 interface ProviderState {
   connection?: ethers.providers.Web3Provider
-  chainId?: number
+  chainId?: string
   account?: string
+  balance?: string
 }
 
 // Define the initial state using that type
@@ -22,18 +23,20 @@ export const providerSlice = createSlice({
     loadProvider: (state, { payload }: PayloadAction<ethers.providers.Web3Provider>) => {
       state.connection = payload
     },
-    loadNetwork: (state, { payload }: PayloadAction<number>) => {
+    loadNetwork: (state, { payload }: PayloadAction<string>) => {
       state.chainId = payload
     },
     loadAccount: (state, { payload }: PayloadAction<string>) => {
       state.account = payload
     },
+    loadBalance: (state, { payload }: PayloadAction<string>) => {
+      state.balance = payload
+    },
   },
 })
 
-export const { loadProvider, loadNetwork, loadAccount } = providerSlice.actions
+export const { loadProvider, loadNetwork, loadAccount, loadBalance } = providerSlice.actions
 
-// Other code such as selectors can use the imported `RootState` type
-export const selectConnection = (state: RootState) => state.provider.connection
+export const selectProvider = (state: RootState) => state.provider
 
 export default providerSlice.reducer
