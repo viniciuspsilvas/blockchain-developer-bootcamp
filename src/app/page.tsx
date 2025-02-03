@@ -11,7 +11,7 @@ import {
   loadNetwork,
   loadProvider
 } from "../lib/features/providers/providerSlice";
-import { loadTokens } from "../lib/features/tokens/tokenSlice";
+import { loadTokens } from "../lib/features/tokens/tokensSlice";
 import { loadExchange } from "../lib/features/exchanges/exchangeSlice";
 
 import configData from "../config.json";

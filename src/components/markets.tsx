@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
-import { loadTokens } from "../lib/features/tokens/tokenSlice";
+import { loadTokens } from "../lib/features/tokens/tokensSlice";
 import { selectProvider } from "../lib/features/providers/providerSlice";
 import configData from "../config.json";
 import { ConfigType } from "../app/page";

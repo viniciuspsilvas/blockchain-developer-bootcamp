@@ -13,8 +13,8 @@ const initialState: TokenState = {
   loaded: false
 }
 
-export const TokenSlice = createSlice({
-  name: 'Token',
+export const TokensSlice = createSlice({
+  name: 'Tokens',
   initialState,
   reducers: {
     loadTokens: (state, { payload: { symbols, contracts } }: PayloadAction<TokenState>) => {
@@ -25,6 +25,6 @@ export const TokenSlice = createSlice({
   },
 })
 
-export const { loadTokens } = TokenSlice.actions
+export const { loadTokens } = TokensSlice.actions
 
-export default TokenSlice.reducer
+export default TokensSlice.reducer
