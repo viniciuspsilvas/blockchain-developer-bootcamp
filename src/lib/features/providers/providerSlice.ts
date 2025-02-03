@@ -6,13 +6,14 @@ import { ethers } from 'ethers'
 // Define a type for the slice state
 interface ProviderState {
   connection?: ethers.providers.Web3Provider
-  chainId?: string
+  chainId: string
   account?: string
   balance?: string
 }
 
 // Define the initial state using that type
 const initialState: ProviderState = {
+  chainId: "0"
 }
 
 export const providerSlice = createSlice({

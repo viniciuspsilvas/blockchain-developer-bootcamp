@@ -12,9 +12,9 @@ import Image from "next/image";
 import logo from "../assets/logo.png";
 import eth from "../assets/eth.svg";
 
-export interface NavbarProps {}
+// export interface NavbarProps {}
 
-export const Navbar: FC<NavbarProps> = () => {
+export const Navbar: FC = () => {
   const dispatch = useAppDispatch();
 
   const { chainId, account, balance } = useAppSelector(selectProvider);
@@ -28,10 +28,9 @@ export const Navbar: FC<NavbarProps> = () => {
     // Connect Ethers to blockchain
     const account = ethers.utils.getAddress(accounts[0]);
     dispatch(loadAccount(account));
-    // await loadAccount(provider, dispatch);
   };
 
-  const networkHandler = async e => {
+  const networkHandler = async (e: { target: { value: unknown; }; }) => {
     await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: e.target.value }]
@@ -66,6 +65,7 @@ export const Navbar: FC<NavbarProps> = () => {
             </option>
             <option value="0x7A69">Localhost</option>
             <option value="0x2a">Kovan</option>
+            <option value="0xaa36a7">Sepolia</option>
           </select>}
       </div>
 
@@ -103,7 +103,10 @@ export const Navbar: FC<NavbarProps> = () => {
                   />
                 </div>
               </a>
-            : <button className="button" onClick={connectHandler}>
+            : <button
+                className="button w-full px-4 py-3 text-blue border border-blue rounded-[10px] font-bold transition duration-250 ease-in-out hover:text-white hover:border-white"
+                onClick={connectHandler}
+              >
                 Connect
               </button>}
         </div>

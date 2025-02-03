@@ -25,6 +25,7 @@ declare global {
 
 type ConfigType = {
   [key: string]: {
+    explorerURL: string;
     DApp: { address: string };
     mETH: { address: string };
     mDAI: { address: string };
@@ -61,7 +62,6 @@ export default function Home() {
             await provider.getBalance(account)
           );
 
-          dispatch(loadAccount(account));
           dispatch(loadProvider(provider));
           dispatch(loadNetwork(`${chainId}`));
           dispatch(loadBalance(balance));
@@ -116,7 +116,6 @@ export default function Home() {
           console.log("chainChanged");
           window.location.reload();
         });
-
         
       };
 
