@@ -16,7 +16,6 @@ import eth from "../assets/eth.svg";
 
 export const Navbar: FC = () => {
   const dispatch = useAppDispatch();
-
   const { chainId, account, balance } = useAppSelector(selectProvider);
 
   const connectHandler = async () => {

@@ -16,6 +16,7 @@ import { loadExchange } from "../lib/features/exchanges/exchangeSlice";
 
 import configData from "../config.json";
 import { Navbar } from "../components/navbar";
+import { Markets } from "../components/markets";
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +24,7 @@ declare global {
   }
 }
 
-type ConfigType = {
+export type ConfigType = {
   [key: string]: {
     explorerURL: string;
     DApp: { address: string };
@@ -128,15 +129,16 @@ export default function Home() {
     <div className="min-h-screen font-dm-sans text-white bg-primary">
       <Navbar />
 
-      <main className="grid grid-cols-12 ">
+      <main className="grid grid-cols-12">
         {/* Left Section */}
-        <section className="grid bg-secondary p-8 col-span-12">
-          {/* Markets */}
+        <section className="grid bg-secondary p-8 col-span-3">
+          <Markets />
           {/* Balance */}
           {/* Order */}
         </section>
         {/* Right Section */}
-        <section className="grid ">
+        <section className="grid bg-primary p-8 col-span-9">
+        Right Section
           {/* PriceChart */}
           {/* Transactions */}
           {/* Trades */}
