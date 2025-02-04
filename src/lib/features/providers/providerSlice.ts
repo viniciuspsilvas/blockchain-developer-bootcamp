@@ -38,6 +38,9 @@ export const providerSlice = createSlice({
 
 export const { loadProvider, loadNetwork, loadAccount, loadBalance } = providerSlice.actions
 
-export const selectProvider = (state: RootState) => state.provider
+export const selectProvider = (state: RootState) => state.provider.connection
+export const selectAccount = (state: RootState) => state.provider.account;
+export const selectBalance = (state: RootState) => state.provider.balance;
+export const selectChainId = (state: RootState) => state.provider.chainId;
 
-export default providerSlice.reducer
+export default providerSlice.reducer;

@@ -2,7 +2,6 @@
 
 import { ethers } from "ethers";
 import TOKEN_ABI from "../abis/Token.json";
-import EXCHANGE_ABI from "../abis/Exchange.json";
 import { useEffect } from "react";
 import { useAppDispatch } from "../lib/hooks";
 import {
@@ -17,6 +16,7 @@ import { loadExchange } from "../lib/features/exchanges/exchangeSlice";
 import configData from "../config.json";
 import { Navbar } from "../components/navbar";
 import { Markets } from "../components/markets";
+
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,7 +41,7 @@ export default function Home() {
 
   useEffect(
     () => {
-      if (typeof window === "undefined") return; // Garante que não roda no SSR
+      if (typeof window === "undefined") return;
 
       const loadBlockchainData = async () => {
         try {
@@ -55,8 +55,10 @@ export default function Home() {
             method: "eth_requestAccounts"
           });
 
-          // Connect Ethers to blockchain
+          // Get account
           const account = ethers.utils.getAddress(accounts[0]);
+
+          // Connect Ethers to blockchain
           const provider = new ethers.providers.Web3Provider(ethereum);
           const { chainId } = await provider.getNetwork();
           const balance = ethers.utils.formatEther(
@@ -66,37 +68,37 @@ export default function Home() {
           dispatch(loadProvider(provider));
           dispatch(loadNetwork(`${chainId}`));
           dispatch(loadBalance(balance));
+          dispatch(loadAccount(account));
 
-          // Token Smart Contracts
-          const DAppToken = new ethers.Contract(
+          // Store only token addresses & symbols in Redux
+          const tokenAddresses = [
             config[chainId].DApp.address,
+            config[chainId].mETH.address
+          ];
+
+          const DAppToken = new ethers.Contract(
+            tokenAddresses[0],
             TOKEN_ABI,
             provider
           );
-
           const mETHToken = new ethers.Contract(
-            config[chainId].mETH.address,
+            tokenAddresses[1],
             TOKEN_ABI,
             provider
           );
-
           const dAppSymbol: string = await DAppToken.symbol();
           const mETHSymbol: string = await mETHToken.symbol();
 
           dispatch(
             loadTokens({
               symbols: [dAppSymbol, mETHSymbol],
-              contracts: [DAppToken, mETHToken]
+              addresses: tokenAddresses
             })
           );
 
-          const exchange = new ethers.Contract(
-            config[chainId].exchange.address,
-            EXCHANGE_ABI,
-            provider
-          );
-
-          dispatch(loadExchange({ contract: exchange }));
+          // Store exchange address in Redux
+          const exchangeAddress = config[chainId].exchange.address;
+          dispatch(loadExchange({ address: exchangeAddress }));
 
           // Fetch current account & balance from Metamask when changed
           window.ethereum.on("accountsChanged", async (_accounts: string[]) => {
@@ -105,7 +107,6 @@ export default function Home() {
             const _balance = ethers.utils.formatEther(
               await provider.getBalance(_account)
             );
-
             dispatch(loadBalance(_balance));
           });
         } catch (error) {
@@ -117,7 +118,6 @@ export default function Home() {
           console.log("chainChanged");
           window.location.reload();
         });
-        
       };
 
       loadBlockchainData();
@@ -138,7 +138,7 @@ export default function Home() {
         </section>
         {/* Right Section */}
         <section className="grid bg-primary p-8 col-span-9">
-        Right Section
+          Right Section
           {/* PriceChart */}
           {/* Transactions */}
           {/* Trades */}

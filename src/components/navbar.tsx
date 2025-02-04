@@ -1,7 +1,9 @@
 import { FC } from "react";
 import {
   loadAccount,
-  selectProvider
+  selectAccount,
+  selectChainId,
+  selectBalance
 } from "../lib/features/providers/providerSlice";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 
@@ -12,32 +14,37 @@ import Image from "next/image";
 import logo from "../assets/logo.png";
 import eth from "../assets/eth.svg";
 
-// export interface NavbarProps {}
-
 export const Navbar: FC = () => {
   const dispatch = useAppDispatch();
-  const { chainId, account, balance } = useAppSelector(selectProvider);
+
+  const account = useAppSelector(selectAccount);
+  const chainId = useAppSelector(selectChainId) || "0"; // Ensure it's always a string
+  const balance = useAppSelector(selectBalance);
 
   const connectHandler = async () => {
-    const ethereum = window.ethereum;
-    const accounts = await ethereum.request({
+    if (!window.ethereum) {
+      console.error("MetaMask not detected");
+      return;
+    }
+
+    const accounts = await window.ethereum.request({
       method: "eth_requestAccounts"
     });
 
-    // Connect Ethers to blockchain
     const account = ethers.utils.getAddress(accounts[0]);
     dispatch(loadAccount(account));
   };
 
-  const networkHandler = async (e: { target: { value: unknown; }; }) => {
+  const networkHandler = async (e: { target: { value: string } }) => {
     await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: e.target.value }]
     });
   };
+
   return (
     <div className="bg-primary h-[10vh] relative grid grid-cols-12">
-      <div className="px-8 col-span-5 flex items-center ">
+      <div className="px-8 col-span-5 flex items-center">
         <Image
           src={logo}
           alt="DApp Logo"
@@ -48,15 +55,22 @@ export const Navbar: FC = () => {
         <h1>DApp Token Exchange</h1>
       </div>
 
-      <div className="flex">
-        <Image src={eth} alt="ETH Logo" />
+      <div className="flex items-center">
+        <Image
+          src={eth}
+          alt="ETH Logo"
+          width={20}
+          height={20}
+          className="mr-2"
+        />
 
-        {chainId &&
+        {chainId !== "0" &&
+          config[chainId] &&
           <select
             name="networks"
             id="networks"
-            className=""
-            value={config[chainId] ? `0x${chainId.toString(16)}` : `0`}
+            className="border border-gray-500 bg-transparent text-white px-2 py-1 rounded-md"
+            value={`0x${parseInt(chainId).toString(16)}`}
             onChange={networkHandler}
           >
             <option value="0" disabled>
@@ -72,13 +86,13 @@ export const Navbar: FC = () => {
         {balance
           ? <p className="m-6">
               <small className="small mr-3 text-neutral">My Balance</small>
-              {Number(balance).toFixed(4)}
+              {Number(balance).toFixed(4)} ETH
             </p>
           : <p>
-              <small className="small m-1">My Balance</small>0 ETH
+              <small className="small m-1">My Balance</small> 0 ETH
             </p>}
 
-        <div className="h-full flex-1 bg- rounded-lg ">
+        <div className="h-full flex-1 rounded-lg">
           {account
             ? <a
                 href={
@@ -89,7 +103,7 @@ export const Navbar: FC = () => {
                 target="_blank"
                 rel="noreferrer"
               >
-                <div className="flex h-full justify-center items-center gap-4 ">
+                <div className="flex h-full justify-center items-center gap-4">
                   {account.slice(0, 5) + "..." + account.slice(38, 42)}
                   <Blockies
                     seed={account}
@@ -103,7 +117,7 @@ export const Navbar: FC = () => {
                 </div>
               </a>
             : <button
-                className="button w-full px-4 py-3 text-blue border border-blue rounded-[10px] font-bold transition duration-250 ease-in-out hover:text-white hover:border-white"
+                className="w-full px-4 py-3 text-blue border border-blue rounded-[10px] font-bold transition duration-250 ease-in-out hover:text-white hover:border-white"
                 onClick={connectHandler}
               >
                 Connect

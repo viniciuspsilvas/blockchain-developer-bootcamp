@@ -1,30 +1,39 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../../store";
 
-// Define a type for the slice state
 interface TokenState {
-  symbols?: string[]
-  contracts?: unknown[]
-  loaded?: boolean
+  symbols?: string[];
+  addresses: string[];
+  loaded?: boolean;
 }
 
-// Define the initial state using that type
 const initialState: TokenState = {
-  loaded: false
-}
+  loaded: false,
+  addresses: [],
+};
 
 export const TokensSlice = createSlice({
-  name: 'Tokens',
+  name: "Tokens",
   initialState,
   reducers: {
-    loadTokens: (state, { payload: { symbols, contracts } }: PayloadAction<TokenState>) => {
-      state.symbols = symbols
-      state.contracts = contracts
-      state.loaded = true
+    loadTokens: (
+      state,
+      { payload: { symbols, addresses } }: PayloadAction<TokenState>
+    ) => {
+      state.symbols = symbols;
+      state.addresses = addresses;
+      state.loaded = true;
     },
   },
-})
+});
 
-export const { loadTokens } = TokensSlice.actions
+export const { loadTokens } = TokensSlice.actions;
 
-export default TokensSlice.reducer
+// Selector to get token addresses
+export const selectTokenAddresses = (state: RootState) => state.tokens.addresses;
+
+// Selector to get token symbols
+export const selectTokenSymbols = (state: RootState) => state.tokens.symbols;
+
+export default TokensSlice.reducer;

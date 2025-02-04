@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 import { loadTokens } from "../lib/features/tokens/tokensSlice";
-import { selectProvider } from "../lib/features/providers/providerSlice";
+import { selectChainId, selectProvider } from "../lib/features/providers/providerSlice";
 import configData from "../config.json";
 import { ConfigType } from "../app/page";
 import { ethers } from "ethers";
@@ -11,17 +11,18 @@ export const config: ConfigType = configData;
 
 export const Markets: FC = () => {
   const dispatch = useAppDispatch();
-  const { chainId, connection: provider } = useAppSelector(selectProvider);
+  const provider = useAppSelector(selectProvider)
+  const chainId = useAppSelector(selectChainId) || "0"; // Ensure network is always a string
 
   const marketHandler = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!provider || !chainId) {
-      console.error("Provider or chainId is not available");
+    if (!provider) {
+      console.error("Provider is not available");
       return;
     }
 
-    const [token1Address, token2Address] = e.target.value.split(",");
-
     try {
+      const [token1Address, token2Address] = e.target.value.split(",");
+
       // Create contract instances for the selected tokens
       const token1Contract = new ethers.Contract(
         token1Address,
@@ -42,7 +43,7 @@ export const Markets: FC = () => {
       dispatch(
         loadTokens({
           symbols: [token1Symbol, token2Symbol],
-          contracts: [token1Contract, token2Contract]
+          addresses: [token1Address, token2Address] // Store addresses instead of contracts
         })
       );
     } catch (error) {
@@ -51,13 +52,18 @@ export const Markets: FC = () => {
   };
 
   return (
-    <div className="relative ">
+    <div className="relative">
       <div className="mb-3">
         <h2>Select Market</h2>
       </div>
 
-      {chainId && config[chainId]
-        ? <select name="markets" id="markets" onChange={marketHandler}>
+      {chainId !== "0" && config[chainId]
+        ? <select
+            name="markets"
+            id="markets"
+            onChange={marketHandler}
+            className="border border-gray-500 bg-transparent text-white px-2 py-1 rounded-md"
+          >
             <option
               value={`${config[chainId].DApp.address},${config[chainId].mETH
                 .address}`}

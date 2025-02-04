@@ -1,28 +1,30 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../../store";
 
-// Define a type for the slice state
 interface ExchangeState {
-  contract?: unknown
-  loaded?: boolean
+  address?: string;
+  loaded?: boolean;
 }
 
-// Define the initial state using that type
 const initialState: ExchangeState = {
-  loaded: false
-}
+  loaded: false,
+};
 
 export const ExchangeSlice = createSlice({
-  name: 'Exchange',
+  name: "Exchange",
   initialState,
   reducers: {
-    loadExchange: (state, { payload: { contract } }: PayloadAction<ExchangeState>) => {
-      state.contract = contract
-      state.loaded = true
+    loadExchange: (state, { payload: { address } }: PayloadAction<{ address: string }>) => {
+      state.address = address;
+      state.loaded = true;
     },
   },
-})
+});
 
-export const { loadExchange } = ExchangeSlice.actions
+export const { loadExchange } = ExchangeSlice.actions;
 
-export default ExchangeSlice.reducer
+// Selector to get the exchange address
+export const selectExchangeAddress = (state: RootState) => state.exchange.address;
+
+export default ExchangeSlice.reducer;
