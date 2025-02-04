@@ -16,6 +16,7 @@ import { loadExchange } from "../lib/features/exchanges/exchangeSlice";
 import configData from "../config.json";
 import { Navbar } from "../components/navbar";
 import { Markets } from "../components/markets";
+import { Balance } from "../components/balance";
 
 declare global {
   interface Window {
@@ -92,7 +93,8 @@ export default function Home() {
           dispatch(
             loadTokens({
               symbols: [dAppSymbol, mETHSymbol],
-              addresses: tokenAddresses
+              addresses: tokenAddresses,
+              balances: []
             })
           );
 
@@ -133,7 +135,7 @@ export default function Home() {
         {/* Left Section */}
         <section className="grid bg-secondary p-8 col-span-3">
           <Markets />
-          {/* Balance */}
+          <Balance />
           {/* Order */}
         </section>
         {/* Right Section */}

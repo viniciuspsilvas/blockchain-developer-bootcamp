@@ -1,12 +1,15 @@
-import { Contract, ethers } from "ethers";
+import { Contract } from "ethers";
 import { useAppSelector } from "../hooks";
-import { selectExchangeAddress } from "../features/exchanges/exchangeSlice";
+import { selectExchangeAddress, selectExchangeBalances } from "../features/exchanges/exchangeSlice";
 import EXCHANGE_ABI from "../../abis/Exchange.json";
+import { selectProvider } from "../features/providers/providerSlice";
 
-export const useExchange = (provider: ethers.providers.Provider) => {
+export const useExchange = () => {
   const address = useAppSelector(selectExchangeAddress);
+  const balances = useAppSelector(selectExchangeBalances);
+  const provider = useAppSelector(selectProvider);
 
-  if (!address) return null;
+  if (!address) return { exchange: null, balances };
 
-  return new Contract(address, EXCHANGE_ABI, provider);
+  return { exchange: new Contract(address, EXCHANGE_ABI, provider), balances };
 };

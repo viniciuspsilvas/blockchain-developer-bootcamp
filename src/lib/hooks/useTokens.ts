@@ -1,13 +1,16 @@
-import { Contract, ethers } from "ethers";
+import { Contract } from "ethers";
 import { useAppSelector } from "../hooks";
-import { selectTokenAddresses, selectTokenSymbols } from "../features/tokens/tokensSlice";
+import { selectTokenAddresses, selectTokenBalances, selectTokenSymbols } from "../features/tokens/tokensSlice";
 import TOKEN_ABI from "../../abis/Token.json";
+import { selectProvider } from "../features/providers/providerSlice";
 
-export const useTokens = (provider: ethers.providers.Provider) => {
+export const useTokens = () => {
   const addresses = useAppSelector(selectTokenAddresses);
   const symbols = useAppSelector(selectTokenSymbols);
+  const balances = useAppSelector(selectTokenBalances);
+  const provider = useAppSelector(selectProvider);
 
-  const contracts = addresses.map((address) => new Contract(address, TOKEN_ABI, provider));
+  const tokens = addresses.map((address) => new Contract(address, TOKEN_ABI, provider));
 
-  return { contracts, symbols };
+  return { tokens, symbols, balances };
 };
