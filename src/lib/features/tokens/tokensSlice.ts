@@ -21,7 +21,10 @@ export const TokensSlice = createSlice({
   reducers: {
     loadTokens: (
       state,
-      { payload: { symbols, addresses } }: PayloadAction<TokenState>
+      { payload: { symbols, addresses } }: PayloadAction<{
+        symbols: string[]
+        addresses: string[]
+      }>
     ) => {
       state.symbols = symbols;
       state.addresses = addresses;
