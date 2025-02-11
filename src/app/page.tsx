@@ -93,8 +93,7 @@ export default function Home() {
           dispatch(
             loadTokens({
               symbols: [dAppSymbol, mETHSymbol],
-              addresses: tokenAddresses,
-              balances: []
+              addresses: tokenAddresses
             })
           );
 
