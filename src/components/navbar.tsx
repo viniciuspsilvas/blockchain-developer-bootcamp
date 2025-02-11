@@ -79,17 +79,17 @@ export const Navbar: FC = () => {
         </select>
       </div>
 
-      <div className="flex pl-4 items-center justify-between rounded-lg bg-secondary absolute top-1/2 right-6 translate-y-[-50%] w-[400px] ">
+      <div className="flex pl-3 items-center justify-between rounded-lg bg-secondary absolute top-1/2 right-6 translate-y-[-50%] w-[400px] ">
         {balance
-          ? <p className="m-6 ">
-              <small className="small mr-3 text-neutral">My Balance</small>
+          ? <p className="flex h-full justify-center items-center gap-4">
+              <small className="small  text-neutral">My Balance</small>
               {Number(balance).toFixed(4)} ETH
             </p>
           : <p>
-              <small className="small m-1 text-neutral">My Balance</small> 0 ETH
+              <small className="small  text-neutral">My Balance</small> 0 ETH
             </p>}
 
-        <div className="">
+        <div className="bg-slate-800 h-full py-3 p-3 rounded-lg">
           {account
             ? <a
                 href={

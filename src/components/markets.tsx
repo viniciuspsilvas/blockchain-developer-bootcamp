@@ -1,7 +1,10 @@
 import { FC } from "react";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 import { loadTokens } from "../lib/features/tokens/tokensSlice";
-import { selectChainId, selectProvider } from "../lib/features/providers/providerSlice";
+import {
+  selectChainId,
+  selectProvider
+} from "../lib/features/providers/providerSlice";
 import configData from "../config.json";
 import { ConfigType } from "../app/page";
 import { ethers } from "ethers";
@@ -11,7 +14,7 @@ export const config: ConfigType = configData;
 
 export const Markets: FC = () => {
   const dispatch = useAppDispatch();
-  const provider = useAppSelector(selectProvider)
+  const provider = useAppSelector(selectProvider);
   const chainId = useAppSelector(selectChainId) || "0"; // Ensure network is always a string
 
   const marketHandler = async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -53,7 +56,7 @@ export const Markets: FC = () => {
 
   return (
     <div className="relative">
-      <div className="mb-3">
+      <div className="mb-2">
         <h2>Select Market</h2>
       </div>
 
@@ -62,7 +65,7 @@ export const Markets: FC = () => {
             name="markets"
             id="markets"
             onChange={marketHandler}
-            className="border border-gray-500 bg-transparent text-white px-2 py-1 rounded-md"
+            className="border border-gray-500 bg-primary text-white p-2 rounded-md w-full"
           >
             <option
               value={`${config[chainId].DApp.address},${config[chainId].mETH
@@ -78,10 +81,10 @@ export const Markets: FC = () => {
             </option>
           </select>
         : <div>
-            <p>Not Deployed to Network</p>
+            <p className="p-4">Not Deployed to Network</p>
           </div>}
 
-      <hr />
+      <hr className="border-gray-800 my-8" />
     </div>
   );
 };
