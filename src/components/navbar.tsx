@@ -43,8 +43,8 @@ export const Navbar: FC = () => {
   };
 
   return (
-    <div className="bg-primary h-[10vh] relative grid grid-cols-12">
-      <div className="px-8 col-span-5 flex items-center">
+    <div className="h-[10vh] relative grid grid-cols-12">
+      <div className="bg-secondary px-8 col-span-3 flex items-center">
         <Image
           src={logo}
           alt="DApp Logo"
@@ -55,44 +55,41 @@ export const Navbar: FC = () => {
         <h1>DApp Token Exchange</h1>
       </div>
 
-      <div className="flex items-center">
+      <div className="flex items-center p-4">
         <Image
           src={eth}
           alt="ETH Logo"
           width={20}
           height={20}
-          className="mr-2"
+          className=""
         />
 
-        {chainId !== "0" &&
-          config[chainId] &&
-          <select
-            name="networks"
-            id="networks"
-            className="border border-gray-500 bg-transparent text-white px-2 py-1 rounded-md"
-            value={`0x${parseInt(chainId).toString(16)}`}
-            onChange={networkHandler}
-          >
-            <option value="0" disabled>
-              Select Network
-            </option>
-            <option value="0x7A69">Localhost</option>
-            <option value="0x2a">Kovan</option>
-            <option value="0xaa36a7">Sepolia</option>
-          </select>}
+        <select
+          name="networks"
+          id="networks"
+          className=" bg-transparent text-white px-2 py-1 rounded-md"
+          value={`0x${parseInt(chainId).toString(16)}`}
+          onChange={networkHandler}
+        >
+          <option value="0" disabled>
+            Select Network
+          </option>
+          <option value="0x7A69">Localhost</option>
+          <option value="0x2a">Kovan</option>
+        </select>
       </div>
 
-      <div className="flex pl-4 items-center col-start-9 col-end-13 rounded-lg bg-secondary absolute top-1/2 right-6 translate-y-[-50%] w-[400px] h-12">
+      <div className="flex pl-4 items-center justify-between rounded-lg bg-secondary absolute top-1/2 right-6 translate-y-[-50%] w-[400px] ">
         {balance
-          ? <p className="m-6">
+          ? <p className="m-6 ">
               <small className="small mr-3 text-neutral">My Balance</small>
               {Number(balance).toFixed(4)} ETH
             </p>
           : <p>
-              <small className="small m-1">My Balance</small> 0 ETH
+              <small className="small m-1 text-neutral">My Balance</small> 0 ETH
             </p>}
 
-        <div className="h-full flex-1 rounded-lg">
+        <div className="">
           {account
             ? <a
                 href={
@@ -117,7 +114,7 @@ export const Navbar: FC = () => {
                 </div>
               </a>
             : <button
-                className="w-full px-4 py-3 text-blue border border-blue rounded-[10px] font-bold transition duration-250 ease-in-out hover:text-white hover:border-white"
+                className="w-full px-10 py-3 rounded-[10px] bg-slate-800 font-bold transition duration-250 ease-in-out hover:text-white hover:border-white"
                 onClick={connectHandler}
               >
                 Connect
