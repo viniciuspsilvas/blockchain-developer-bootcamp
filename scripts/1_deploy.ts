@@ -9,7 +9,7 @@ async function main() {
   const Exchange = await ethers.getContractFactory("Exchange");
 
   const accounts = await ethers.getSigners()
-  console.log(`Accounts fetched: \n${accounts[0].address}\n${accounts[1].address}\n${accounts[2].address}`)
+  console.log(`Accounts fetched: \n Maker :${accounts[0].address}\n Taker: ${accounts[1].address}\n FeeAccount: ${accounts[2].address}`)
 
   // Deploy contract
   const dapp = await Token.deploy("Dapp University", "DAPP", 1000000)
@@ -24,8 +24,8 @@ async function main() {
   await mDAI.deployed()
   console.log(`mDAI deployed to: ${mDAI.address}`)
   
-  
-  const exchange = await Exchange.deploy(accounts[1].address, 10)
+  // Fee Account accounts[2]
+  const exchange = await Exchange.deploy(accounts[2].address, 10)
   await exchange.deployed()
   console.log(`Exchange deployed to: ${exchange.address}`)
 }

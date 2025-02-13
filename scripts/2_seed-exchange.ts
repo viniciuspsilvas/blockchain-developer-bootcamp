@@ -20,6 +20,7 @@ const wait = (seconds: number) =>
 async function main() {
   // Fetch accounts from Hardhat
   const accounts = await ethers.getSigners();
+  console.log(`Accounts fetched: \n Maker :${accounts[0].address}\n Taker: ${accounts[1].address}\n FeeAccount: ${accounts[2].address}`)
 
   // Fetch network details
   const { chainId } = await ethers.provider.getNetwork();
@@ -30,6 +31,7 @@ async function main() {
   const mETH = await ethers.getContractAt("Token", config[chainId].mETH.address);
   const mDAI = await ethers.getContractAt("Token", config[chainId].mDAI.address);
   const exchange = await ethers.getContractAt("Exchange", config[chainId].exchange.address);
+
 
   console.log(`📜 Contracts Loaded:\n   🪙 DApp:  ${DApp.address}\n   🪙 mETH:  ${mETH.address}\n   🪙 mDAI:  ${mDAI.address}\n   🔄 Exchange: ${exchange.address}\n`);
 
@@ -116,7 +118,7 @@ async function main() {
   result = await transaction.wait();
   console.log(`✅ Order Created: User1=[${user1.address}] wants 50 mETH for 15 DApp`);
 
-    // User 2 fills order
+  // User 2 fills order
   // Ensure result.events exists and contains at least one event
   if (result.events && result.events.length > 0 && result.events[0].args) {
     orderId = result.events[0].args.id;
@@ -156,7 +158,7 @@ async function main() {
   //  Seed Open Orders
   // #########################  
 
-   // User 1 makes 10 orders
+  // User 1 makes 10 orders
   console.log(`📢 Seeding 10 open orders for User1=[${user1.address}]...`);
   for (let i = 1; i <= 10; i++) {
     transaction = await exchange.connect(user1).makeOrder(mETH.address, tokens(10 * i), DApp.address, tokens(10));
