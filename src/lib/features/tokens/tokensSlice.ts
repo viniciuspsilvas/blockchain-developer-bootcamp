@@ -30,8 +30,8 @@ export const TokensSlice = createSlice({
       state.addresses = addresses;
       state.loaded = true;
     },
-    loadTokenBalance: (state, { payload: { balance } }: PayloadAction<{ balance: string }>) => {
-      state.balances = [...state.balances, balance];
+    loadTokenBalance: (state, { payload: { balances } }: PayloadAction<{ balances: string[] }>) => {
+      state.balances = balances;
     },
   },
 });

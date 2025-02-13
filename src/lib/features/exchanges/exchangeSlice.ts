@@ -1,16 +1,23 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
 
 interface ExchangeState {
   address?: string;
   loaded?: boolean;
-  balances: string[]
+  balances: string[];
+  transaction?: {
+    type: string;
+    isPending: boolean;
+    isSuccessful?: boolean;
+    isError?: boolean;
+  };
+  transferInProgress: boolean
 }
 
 const initialState: ExchangeState = {
   loaded: false,
-  balances: []
+  transferInProgress: false,
+  balances: [],
 };
 
 export const ExchangeSlice = createSlice({
@@ -21,18 +28,30 @@ export const ExchangeSlice = createSlice({
       state.address = address;
       state.loaded = true;
     },
-    loadExchangeBalance: (state, { payload: { balance } }: PayloadAction<{ balance: string }>) => {
-      state.balances = [...state.balances, balance];
+    loadExchangeBalance: (state, { payload: { balances } }: PayloadAction<{ balances: string[] }>) => {
+      state.balances = balances;
+    },
+    transferRequest: (state) => {
+      state.transaction = { type: "Transfer", isPending: true };
+      state.transferInProgress = true;
+    },
+    transferSuccess: (state) => {
+      state.transaction = { type: "Transfer", isPending: false, isSuccessful: true };
+      state.transferInProgress = false;
+    },
+    transferFail: (state) => {
+      state.transaction = { type: "Transfer", isPending: false, isError: true };
+      state.transferInProgress = false;
     },
   },
 });
 
-export const { loadExchange, loadExchangeBalance } = ExchangeSlice.actions;
+export const { loadExchange, loadExchangeBalance, transferRequest, transferSuccess, transferFail } = ExchangeSlice.actions;
 
-// Selector to get the exchange address
+// Selectors
 export const selectExchangeAddress = (state: RootState) => state.exchange.address;
-
-// Selector to get the exchange balance
 export const selectExchangeBalances = (state: RootState) => state.exchange.balances;
+export const selectTransaction = (state: RootState) => state.exchange.transaction;
+export const selectTransferInProgress = (state: RootState) => state.exchange.transferInProgress;
 
 export default ExchangeSlice.reducer;

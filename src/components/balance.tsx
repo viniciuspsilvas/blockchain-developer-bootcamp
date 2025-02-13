@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC, FormEvent, useEffect, useState } from "react";
 import { useAppDispatch } from "../lib/hooks";
 import { selectAccount } from "../lib/features/providers/providerSlice";
 import configData from "../config.json";
@@ -14,16 +14,22 @@ import {
 } from "../lib/features/tokens/tokensSlice";
 import { useTokens } from "../lib/hooks/useTokens";
 import { useExchange } from "../lib/hooks/useExchange";
-import { loadExchangeBalance } from "../lib/features/exchanges/exchangeSlice";
+import {
+  loadExchangeBalance,
+  selectTransferInProgress
+} from "../lib/features/exchanges/exchangeSlice";
 
 export const config: ConfigType = configData;
 
 export const Balance: FC = () => {
+  const [token1TransferAmount, setToken1TransferAmount] = useState(0);
+
   const symbols = useSelector(selectTokenSymbols);
   const tokenAddresses = useSelector(selectTokenAddresses);
   const account = useSelector(selectAccount);
+  const transferInProgress = useSelector(selectTransferInProgress);
 
-  const { tokens, balances: tokenBalances } = useTokens();
+  const { tokens, balances: tokenBalances, transferTokens } = useTokens();
   const { exchange, balances: exchangeBalances } = useExchange();
 
   const dispatch = useAppDispatch();
@@ -32,55 +38,67 @@ export const Balance: FC = () => {
     () => {
       const loadBalances = async () => {
         if (!tokenAddresses) {
-          throw Error("Tokens not loaded");
+          throw new Error("Tokens not loaded");
         }
 
         if (!exchange) {
-          // throw Error("Exchange not loaded");
-          return;
+          return; // Prevents execution if exchange is not loaded
         }
 
-        let balance = ethers.utils.formatUnits(
-          await tokens[0].balanceOf(account),
-          18
-        );
+        // Initialize separate arrays to store balances
+        const tokenBalances: string[] = [];
+        const exchangeBalances: string[] = [];
 
-        dispatch(loadTokenBalance({ balance }));
+        // Fetch balances for all tokens
+        for (const token of tokens) {
+          // Fetch token balance
+          const tokenBal = await token.balanceOf(account);
+          const formattedTokenBal = ethers.utils.formatEther(tokenBal);
+          tokenBalances.push(formattedTokenBal);
 
-        balance = ethers.utils.formatUnits(
-          await exchange.balanceOf(tokens[0].address, account),
-          18
-        );
+          // Fetch exchange balance
+          const exchangeBal = await exchange.balanceOf(token.address, account);
+          const formattedExchangeBal = ethers.utils.formatEther(exchangeBal);
+          exchangeBalances.push(formattedExchangeBal);
+        }
 
-        dispatch(loadExchangeBalance({ balance }));
-
-        balance = ethers.utils.formatUnits(
-          await tokens[1].balanceOf(account),
-          18
-        );
-
-        dispatch(loadTokenBalance({ balance }));
-
-        balance = ethers.utils.formatUnits(
-          await exchange.balanceOf(tokens[1].address, account),
-          18
-        );
-
-        dispatch(loadExchangeBalance({ balance }));
+        // Dispatch both balances as arrays
+        dispatch(loadTokenBalance({ balances: tokenBalances }));
+        dispatch(loadExchangeBalance({ balances: exchangeBalances }));
       };
 
       loadBalances();
     },
-    [exchange, tokens, account, tokenAddresses, dispatch]
+    [account, tokenAddresses, transferInProgress]
   );
+
+  const amountHandler = (
+    e: { target: { value: string } },
+    token: { address: string }
+  ) => {
+    if (token.address === tokens[0].address) {
+      setToken1TransferAmount(Number(e.target.value));
+    }
+  };
+
+  const depositHandler = (
+    e: FormEvent<HTMLFormElement>,
+    token: ethers.Contract
+  ) => {
+    e.preventDefault();
+
+    if (token.address === tokens[0].address) {
+      transferTokens(token, token1TransferAmount);
+      setToken1TransferAmount(0);
+    }
+  };
 
   return (
     <div className="bg-secondary rounded-md">
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-medium">Balance</h2>
         <div className="bg-primary rounded-md p-1 flex space-x-2">
-          <button className="px-4 py-1 bg-blue-500 text-white rounded-md">
+          <button className="px-4 py-1 btn bg-blue text-white rounded-md ">
             Deposit
           </button>
           <button className="px-4 py-1 text-white">Withdraw</button>
@@ -89,7 +107,7 @@ export const Balance: FC = () => {
 
       {/* Deposit/Withdraw Component 1 (DApp) */}
       <div className="mb-4">
-        <div className="flex justify-between items-center p-4 bg-primary rounded-md">
+        <div className="flex justify-between items-center p-4  rounded-md">
           <p className="text-sm">
             <small className="text-neutral">Token</small>
             <br />
@@ -105,42 +123,48 @@ export const Balance: FC = () => {
           <p className="text-sm">
             <small className="text-neutral">Wallet</small>
             <br />
-            {tokenBalances && tokenBalances[0]}
+
+            {tokenBalances && Number(tokenBalances[0]).toFixed(4)}
           </p>
           <p className="text-sm">
             <small className="text-neutral">Exchange</small>
             <br />
-            {exchangeBalances && exchangeBalances[0]}
+            {exchangeBalances && Number(exchangeBalances[0]).toFixed(4)}
           </p>
         </div>
+
+        <form
+          className="w-full flex flex-col space-y-2"
+          onSubmit={e => depositHandler(e, tokens[0])}
+        >
+          <label htmlFor="token1" className="text-sm text-neutral">
+            Amount
+          </label>
+          <input
+            type="text"
+            id="token1"
+            placeholder="0.0000"
+            className="bg-primary text-white p-2 rounded-md w-full"
+            value={token1TransferAmount === 0 ? "" : token1TransferAmount}
+            onChange={e => amountHandler(e, tokens[0])}
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 border border-blue text-blue rounded-md"
+          >
+            Deposit
+          </button>
+        </form>
       </div>
 
-      <hr className="border-gray-600 my-4" />
+      <hr className="border-gray-800 my-8" />
 
       {/* Deposit/Withdraw Component 2 (mETH) */}
       <div className="mb-4">
-        <div className="flex justify-between items-center p-4 bg-primary rounded-md">
-          <form className="w-full flex flex-col space-y-2">
-            <label htmlFor="token1" className="text-sm text-neutral">
-              Amount
-            </label>
-            <input
-              type="text"
-              id="token1"
-              placeholder="0.0000"
-              className="bg-secondary text-white p-2 rounded-md w-full"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md"
-            >
-              Deposit
-            </button>
-          </form>
-        </div>
+        <div className="flex justify-between items-center p-4 bg-primary rounded-md" />
       </div>
 
-      <hr className="border-gray-600 my-4" />
+      <hr className="border-gray-800 my-8" />
     </div>
   );
 };

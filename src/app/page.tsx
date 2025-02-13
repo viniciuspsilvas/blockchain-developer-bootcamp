@@ -1,6 +1,6 @@
 "use client";
 
-import { ethers } from "ethers";
+import { Contract, ethers } from "ethers";
 import TOKEN_ABI from "../abis/Token.json";
 import { useEffect } from "react";
 import { useAppDispatch } from "../lib/hooks";
@@ -11,12 +11,16 @@ import {
   loadProvider
 } from "../lib/features/providers/providerSlice";
 import { loadTokens } from "../lib/features/tokens/tokensSlice";
-import { loadExchange } from "../lib/features/exchanges/exchangeSlice";
+import {
+  loadExchange,
+  transferSuccess
+} from "../lib/features/exchanges/exchangeSlice";
 
 import configData from "../config.json";
 import { Navbar } from "../components/navbar";
 import { Markets } from "../components/markets";
 import { Balance } from "../components/balance";
+import EXCHANGE_ABI from "../abis/Exchange.json";
 
 declare global {
   interface Window {
@@ -99,6 +103,12 @@ export default function Home() {
 
           // Store exchange address in Redux
           const exchangeAddress = config[chainId].exchange.address;
+          const exchange = new Contract(
+            exchangeAddress,
+            EXCHANGE_ABI,
+            provider
+          );
+
           dispatch(loadExchange({ address: exchangeAddress }));
 
           // Fetch current account & balance from Metamask when changed
@@ -109,6 +119,11 @@ export default function Home() {
               await provider.getBalance(_account)
             );
             dispatch(loadBalance(_balance));
+          });
+
+          // Listen to events
+          exchange.on("Deposit", (token, user, amount, balance, event) => {
+            dispatch(transferSuccess(event));
           });
         } catch (error) {
           console.error("Error while loading blockchain data:", error);
