@@ -125,6 +125,10 @@ export default function Home() {
           exchange.on("Deposit", (token, user, amount, balance, event) => {
             dispatch(transferSuccess(event));
           });
+
+          exchange.on("Withdraw", (token, user, amount, balance, event) => {
+            dispatch(transferSuccess(event));
+          });
         } catch (error) {
           console.error("Error while loading blockchain data:", error);
         }

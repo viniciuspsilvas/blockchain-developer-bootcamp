@@ -32,7 +32,12 @@ export const Balance: FC = () => {
   const account = useSelector(selectAccount);
   const transferInProgress = useSelector(selectTransferInProgress);
 
-  const { tokens, balances: tokenBalances, transferTokens } = useTokens();
+  const {
+    tokens,
+    balances: tokenBalances,
+    transferTokens,
+    withdrawTokens
+  } = useTokens();
   const { exchange, balances: exchangeBalances } = useExchange();
 
   const dispatch = useAppDispatch();
@@ -98,15 +103,40 @@ export const Balance: FC = () => {
     }
   };
 
+  const withdrawHandler = (
+    e: FormEvent<HTMLFormElement>,
+    token: ethers.Contract
+  ) => {
+    e.preventDefault();
+
+    if (token.address === tokens[0].address) {
+      withdrawTokens(token, token1TransferAmount);
+      setToken1TransferAmount(0);
+    } else if (token.address === tokens[1].address) {
+      withdrawTokens(token, token2TransferAmount);
+      setToken2TransferAmount(0);
+    }
+  };
+
   return (
     <div className="bg-secondary rounded-md">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-medium">Balance</h2>
-        <div className="bg-primary rounded-md p-1 flex space-x-2">  
-          <button className={`px-4 py-1 text-white rounded-md ${isDeposit ? "bg-blue" : ""}`} onClick={() => setIsDeposit(true)}>
+        <div className="bg-primary rounded-md p-1 flex space-x-2">
+          <button
+            className={`px-4 py-1 text-white rounded-md ${
+              isDeposit ? "bg-blue" : ""
+            }`}
+            onClick={() => setIsDeposit(true)}
+          >
             Deposit
           </button>
-          <button className={`px-4 py-1 text-white rounded-md ${isDeposit ? "" : "bg-blue"}`} onClick={() => setIsDeposit(false)}>
+          <button
+            className={`px-4 py-1 text-white rounded-md ${
+              isDeposit ? "" : "bg-blue"
+            }`}
+            onClick={() => setIsDeposit(false)}
+          >
             Withdraw
           </button>
         </div>
@@ -142,7 +172,11 @@ export const Balance: FC = () => {
 
         <form
           className="w-full flex flex-col space-y-2"
-          onSubmit={(e) => depositHandler(e, tokens[0])}
+          onSubmit={
+            isDeposit
+              ? (e) => depositHandler(e, tokens[0])
+              : (e) => withdrawHandler(e, tokens[0])
+          }
         >
           <label htmlFor="token1" className="text-sm text-neutral">
             Amount
@@ -159,7 +193,7 @@ export const Balance: FC = () => {
             type="submit"
             className="px-4 py-2 border border-blue text-blue rounded-md"
           >
-            {isDeposit ? "Deposit" : "Withdraw"}  
+            {isDeposit ? "Deposit" : "Withdraw"}
           </button>
         </form>
       </div>
@@ -196,7 +230,11 @@ export const Balance: FC = () => {
 
         <form
           className="w-full flex flex-col space-y-2"
-          onSubmit={(e) => depositHandler(e, tokens[1])}
+          onSubmit={
+            isDeposit
+              ? (e) => depositHandler(e, tokens[1])
+              : (e) => withdrawHandler(e, tokens[1])
+          }
         >
           <label htmlFor="token2" className="text-sm text-neutral">
             Amount

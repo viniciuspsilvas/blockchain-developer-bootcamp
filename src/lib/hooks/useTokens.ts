@@ -42,12 +42,43 @@ export const useTokens = () => {
       const receipt = await depositTx.wait();
       console.log("✅ Deposit successful!", receipt);
 
-      // dispatch(transferSuccess(receipt.events));
     } catch (error) {
       console.error("❌ Transfer failed:", error);
       dispatch(transferFail());
     }
   };
 
-  return { tokens, symbols, balances, transferTokens };
+  const withdrawTokens = async (token: Contract, amount: number) => {
+    if (!provider || !exchange) {
+      console.error("❌ Provider or Exchange contract is not available.");
+      return;
+    } 
+
+    dispatch(transferRequest());
+
+    try {
+      const signer = provider.getSigner();
+
+      // Approve the exchange to spend tokens
+      console.log("🔹 Approving exchange to spend tokens...");
+
+      const amountToTransfer = ethers.utils.parseUnits(amount.toString(), 18)
+      const approvalTx = await token.connect(signer).approve(exchange.address, amountToTransfer);
+      await approvalTx.wait();
+      console.log("✅ Approval successful!", amountToTransfer);
+
+      // Withdraw tokens from the exchange
+      console.log("🔹 Withdrawing tokens from the exchange...");
+      const withdrawTx = await exchange.connect(signer).withdrawToken (token.address, amountToTransfer);
+      const receipt = await withdrawTx.wait();
+      console.log("✅ Withdrawal successful!", receipt);
+
+      // dispatch(transferSuccess(receipt.events));
+    } catch (error) {
+      console.error("❌ Withdrawal failed:", error);
+      dispatch(transferFail());
+      }
+  };
+
+  return { tokens, symbols, balances, transferTokens, withdrawTokens   };
 };
