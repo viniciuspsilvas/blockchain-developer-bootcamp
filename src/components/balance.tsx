@@ -19,6 +19,8 @@ import {
   loadExchangeBalance,
   selectTransferInProgress
 } from "../lib/features/exchanges/exchangeSlice";
+import ToggleButtonGroup from "./ToggleButtonGroup";
+import { Loading } from "./Loading";
 
 export const config: ConfigType = configData;
 
@@ -26,6 +28,8 @@ export const Balance: FC = () => {
   const [isDeposit, setIsDeposit] = useState(true);
   const [token1TransferAmount, setToken1TransferAmount] = useState(0);
   const [token2TransferAmount, setToken2TransferAmount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const symbols = useSelector(selectTokenSymbols);
   const tokenAddresses = useSelector(selectTokenAddresses);
@@ -44,38 +48,62 @@ export const Balance: FC = () => {
 
   useEffect(() => {
     const loadBalances = async () => {
-      if (!tokenAddresses) {
-        throw new Error("Tokens not loaded");
+      // Only run if we have all required data
+      if (!tokenAddresses?.length || !exchange || !account || !tokens?.length) {
+        return;
       }
 
-      if (!exchange) {
-        return; // Prevents execution if exchange is not loaded
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // Initialize separate arrays to store balances
+        const tokenBalances: string[] = [];
+        const exchangeBalances: string[] = [];
+
+        // Fetch balances for all tokens
+        for (const token of tokens) {
+          // Fetch token balance
+          const tokenBal = await token.balanceOf(account);
+          const formattedTokenBal = ethers.utils.formatEther(tokenBal);
+          tokenBalances.push(formattedTokenBal);
+
+          // Fetch exchange balance
+          const exchangeBal = await exchange.balanceOf(token.address, account);
+          const formattedExchangeBal = ethers.utils.formatEther(exchangeBal);
+          exchangeBalances.push(formattedExchangeBal);
+        }
+
+        // Dispatch both balances as arrays
+        dispatch(loadTokenBalance({ balances: tokenBalances }));
+        dispatch(loadExchangeBalance({ balances: exchangeBalances }));
+        setError(null);
+      } catch (error) {
+        console.error("Error loading balances:", error);
+        setError("Failed to load balances");
+      } finally {
+        setIsLoading(false);
       }
-
-      // Initialize separate arrays to store balances
-      const tokenBalances: string[] = [];
-      const exchangeBalances: string[] = [];
-
-      // Fetch balances for all tokens
-      for (const token of tokens) {
-        // Fetch token balance
-        const tokenBal = await token.balanceOf(account);
-        const formattedTokenBal = ethers.utils.formatEther(tokenBal);
-        tokenBalances.push(formattedTokenBal);
-
-        // Fetch exchange balance
-        const exchangeBal = await exchange.balanceOf(token.address, account);
-        const formattedExchangeBal = ethers.utils.formatEther(exchangeBal);
-        exchangeBalances.push(formattedExchangeBal);
-      }
-
-      // Dispatch both balances as arrays
-      dispatch(loadTokenBalance({ balances: tokenBalances }));
-      dispatch(loadExchangeBalance({ balances: exchangeBalances }));
     };
 
     loadBalances();
-  }, [account, tokenAddresses, transferInProgress]);
+  }, [account, tokenAddresses, transferInProgress]); // Removed exchange and tokens from dependencies
+
+  if (!tokenAddresses?.length || !exchange || !account || !tokens?.length) {
+    return <Loading />;
+  }
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return (
+      <div className="bg-secondary rounded-md p-4">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   const amountHandler = (
     e: { target: { value: string } },
@@ -88,33 +116,49 @@ export const Balance: FC = () => {
     }
   };
 
-  const depositHandler = (
+  const depositHandler = async (
     e: FormEvent<HTMLFormElement>,
     token: ethers.Contract
   ) => {
     e.preventDefault();
 
     if (token.address === tokens[0].address) {
-      transferTokens(token, token1TransferAmount);
-      setToken1TransferAmount(0);
+      const result = await transferTokens(token, token1TransferAmount);
+      if (result.success) {
+        setToken1TransferAmount(0);
+      } else {
+        console.error("Deposit failed:", result.error);
+      }
     } else if (token.address === tokens[1].address) {
-      transferTokens(token, token2TransferAmount);
-      setToken2TransferAmount(0);
+      const result = await transferTokens(token, token2TransferAmount);
+      if (result.success) {
+        setToken2TransferAmount(0);
+      } else {
+        console.error("Deposit failed:", result.error);
+      }
     }
   };
 
-  const withdrawHandler = (
+  const withdrawHandler = async (
     e: FormEvent<HTMLFormElement>,
     token: ethers.Contract
   ) => {
     e.preventDefault();
 
     if (token.address === tokens[0].address) {
-      withdrawTokens(token, token1TransferAmount);
-      setToken1TransferAmount(0);
+      const result = await withdrawTokens(token, token1TransferAmount);
+      if (result.success) {
+        setToken1TransferAmount(0);
+      } else {
+        console.error("Withdrawal failed:", result.error);
+      }
     } else if (token.address === tokens[1].address) {
-      withdrawTokens(token, token2TransferAmount);
-      setToken2TransferAmount(0);
+      const result = await withdrawTokens(token, token2TransferAmount);
+      if (result.success) {
+        setToken2TransferAmount(0);
+      } else {
+        console.error("Withdrawal failed:", result.error);
+      }
     }
   };
 
@@ -122,24 +166,11 @@ export const Balance: FC = () => {
     <div className="bg-secondary rounded-md">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-medium">Balance</h2>
-        <div className="bg-primary rounded-md p-1 flex space-x-2">
-          <button
-            className={`px-4 py-1 text-white rounded-md ${
-              isDeposit ? "bg-blue" : ""
-            }`}
-            onClick={() => setIsDeposit(true)}
-          >
-            Deposit
-          </button>
-          <button
-            className={`px-4 py-1 text-white rounded-md ${
-              isDeposit ? "" : "bg-blue"
-            }`}
-            onClick={() => setIsDeposit(false)}
-          >
-            Withdraw
-          </button>
-        </div>
+        <ToggleButtonGroup
+          options={["Deposit", "Withdraw"]}
+          activeOption={isDeposit ? "Deposit" : "Withdraw"}
+          onOptionClick={(option: string) => setIsDeposit(option === "Deposit")}
+        />
       </div>
 
       {/* Deposit/Withdraw Component 1 (DApp) */}
