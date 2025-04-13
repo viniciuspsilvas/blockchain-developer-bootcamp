@@ -13,6 +13,7 @@ import {
 import { loadTokens } from "../lib/features/tokens/tokensSlice";
 import {
   loadExchange,
+  orderSuccess,
   transferSuccess
 } from "../lib/features/exchanges/exchangeSlice";
 
@@ -21,6 +22,7 @@ import { Navbar } from "../components/navbar";
 import { Markets } from "../components/markets";
 import { Balance } from "../components/balance";
 import EXCHANGE_ABI from "../abis/Exchange.json";
+import { Order } from "../components/order";
 
 declare global {
   interface Window {
@@ -129,6 +131,17 @@ export default function Home() {
           exchange.on("Withdraw", (token, user, amount, balance, event) => {
             dispatch(transferSuccess(event));
           });
+
+          exchange.on("Order", (orderId, user, tokenGet, amountGet, tokenGive, amountGive, event) => {
+            dispatch(orderSuccess(event));
+          });
+
+          // TODO Chage it to CancelOrder
+          exchange.on("Cancel", (orderId, user, tokenGet, amountGet, tokenGive, amountGive, event) => {
+            // TODO: Check it out, I think it'not orderSuccess
+            dispatch(orderSuccess(event));
+          });
+          
         } catch (error) {
           console.error("Error while loading blockchain data:", error);
         }
@@ -154,7 +167,7 @@ export default function Home() {
         <section className="grid bg-secondary p-8 col-span-3">
           <Markets />
           <Balance />
-          {/* Order */}
+          <Order />
         </section>
         {/* Right Section */}
         <section className="grid bg-primary p-8 col-span-9">
