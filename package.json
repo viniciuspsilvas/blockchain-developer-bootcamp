@@ -39,6 +39,7 @@
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
     "@types/chai": "^4.2.0",
+    "@types/lodash": "^4.17.16",
     "@types/mocha": "^9.1.0",
     "@types/node": "^20",
     "@types/react": "^19",

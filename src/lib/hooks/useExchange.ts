@@ -2,10 +2,9 @@ import { Contract, ethers } from "ethers";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import {
   orderFail,
-  orderSuccess,
   selectExchangeAddress,
   selectExchangeBalances,
-  startOrder
+  newOrderRequest
 } from "../features/exchanges/exchangeSlice";
 import EXCHANGE_ABI from "../../abis/Exchange.json";
 import { selectProvider } from "../features/providers/providerSlice";
@@ -24,8 +23,8 @@ export const useExchange = () => {
 
   // Early return if exchange or provider is not available
   if (!address || !provider) {
-    return { 
-      exchange: null, 
+    return {
+      exchange: null,
       balances: balances || [],
       makeBuyOrder: async () => ({
         success: false,
@@ -49,8 +48,8 @@ export const useExchange = () => {
    * @returns The result of the order operation
    */
   const makeBuyOrder = async (
-    amount: number, 
-    price: number, 
+    amount: number,
+    price: number,
     tokens: Contract[]
   ): Promise<OrderResult> => {
     if (!exchange || !provider) {
@@ -61,7 +60,7 @@ export const useExchange = () => {
     }
 
     try {
-      dispatch(startOrder());
+      dispatch(newOrderRequest());
 
       const tokenGet = tokens[0].address;
       const amountGet = ethers.utils.parseUnits(
@@ -75,11 +74,11 @@ export const useExchange = () => {
       const transaction = await exchange
         .connect(signer)
         .makeOrder(tokenGet, amountGet, tokenGive, amountGive);
-      
+
       const receipt = await transaction.wait();
       console.log("✅ Order made successfully!");
 
-      dispatch(orderSuccess());
+      // dispatch(orderSuccess());
       return {
         success: true,
         receipt
@@ -108,17 +107,15 @@ export const useExchange = () => {
     }
 
     try {
-      dispatch(startOrder());
+      dispatch(newOrderRequest());
 
       const signer = provider.getSigner();
-      const transaction = await exchange
-        .connect(signer)
-        .cancelOrder(orderId);
-      
+      const transaction = await exchange.connect(signer).cancelOrder(orderId);
+
       const receipt = await transaction.wait();
       console.log("✅ Order cancelled successfully!");
 
-      dispatch(orderSuccess());
+      // dispatch(orderSuccess());
       return {
         success: true,
         receipt
@@ -133,9 +130,9 @@ export const useExchange = () => {
     }
   };
 
-  return { 
-    exchange, 
-    balances, 
+  return {
+    exchange,
+    balances,
     makeBuyOrder,
     cancelOrder
   };
