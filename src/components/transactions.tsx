@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectTokenSymbols,
@@ -7,14 +7,17 @@ import {
 import { setSelectedMarket } from "../lib/features/exchanges/exchangeSlice";
 import sort from "../assets/sort.svg";
 import Image from "next/image";
-import { filledOrdersSelector } from "../lib/features/exchanges/selectors";
+import { myOpenOrdersSelector } from "../lib/features/exchanges/selectors";
+import { DecoratedOrder } from "../lib/features/exchanges/selectors";
 import { Banner } from "./Banner";
+import ToggleButtonGroup from "./ToggleButtonGroup";
 
-export const Trades: FC = () => {
+export const Transactions: FC = () => {
   const dispatch = useDispatch();
   const symbols = useSelector(selectTokenSymbols);
-  const filledOrders = useSelector(filledOrdersSelector);
   const addresses = useSelector(selectTokenAddresses);
+  const myOpenOrders = useSelector(myOpenOrdersSelector);
+  const [activeOption, setActiveOption] = useState("Orders");
 
   // Definir o mercado selecionado quando o componente é montado
   useEffect(() => {
@@ -23,40 +26,38 @@ export const Trades: FC = () => {
     }
   }, [addresses, dispatch]);
 
-  if (!filledOrders) {
+  if (!myOpenOrders) {
     return (
-      <div className="bg-secondary rounded-md p-4 h-full">
+      <div className="bg-secondary rounded-md p-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Trades</h2>
+          <h2 className="text-lg font-medium">My Orders</h2>
         </div>
-        <p className="text-center">Loading trades...</p>
+        <p className="text-center">Loading orders...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-secondary rounded-md p-4 h-full">
+    <div className="bg-secondary rounded-md p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-medium">Trades</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium">My Orders</h2>
+        </div>
+
+        <ToggleButtonGroup
+          options={["Orders", "Trades"]}
+          activeOption={activeOption}
+          onOptionClick={(option: string) => setActiveOption(option)}
+        />
       </div>
 
-      {!filledOrders || filledOrders.length === 0 ? (
-        <Banner text="No Transactions" />
+      {!myOpenOrders || myOpenOrders.length === 0 ? (
+        <Banner text="No Open Orders" />
       ) : (
         <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
           <thead>
             <tr className="text-gray-500 text-xs">
               <th >
-                Time
-                <Image
-                  src={sort}
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="inline-block ml-2"
-                />
-              </th>
-              <th className="text-right">
                 {symbols && symbols[0]}
                 <Image
                   src={sort}
@@ -79,13 +80,11 @@ export const Trades: FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filledOrders.map((order) => {
+            {myOpenOrders.map((order: DecoratedOrder) => {
               return (
                 <tr key={order.id}>
-                  <td>{order.formattedTimestamp}</td>
                   <td
-                    className="text-right"
-                    style={{ color: `${order.tokenPriceClass}` }}
+                    style={{ color: `${order.orderTypeClass}` }}
                   >
                     {order.token0Amount}
                   </td>

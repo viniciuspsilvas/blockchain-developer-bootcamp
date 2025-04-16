@@ -36,7 +36,7 @@ export const OrderBook: FC = () => {
         <h2 className="text-lg font-medium">Order Book</h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-8">
         {/* Sell Orders */}
         <div>
           {orderBook.sellOrders.length === 0 ? (
@@ -48,7 +48,7 @@ export const OrderBook: FC = () => {
               </caption>
               <thead>
                 <tr className="text-gray-500 text-xs">
-                  <th className="text-right">
+                  <th >
                     {symbols && symbols[0]}
                     <Image
                       src={sort}
@@ -71,7 +71,7 @@ export const OrderBook: FC = () => {
               <tbody>
                 {orderBook.sellOrders.map((order, index) => (
                   <tr key={index} className="hover:bg-primary">
-                    <td className="text-right">{order.token0Amount}</td>
+                    <td >{order.token0Amount}</td>
                     <td className="text-right" style={{ color: order.orderTypeClass }}>{order.tokenPrice}</td>
                     <td className="text-right">{order.token1Amount}</td>
                   </tr>
@@ -92,7 +92,7 @@ export const OrderBook: FC = () => {
               </caption>
               <thead>
                 <tr className="text-gray-500 text-xs">
-                  <th className="text-right">
+                  <th >
                     {symbols && symbols[0]}
                     <Image
                       src={sort}
@@ -115,7 +115,7 @@ export const OrderBook: FC = () => {
               <tbody>
                 {orderBook.buyOrders.map((order, index) => (
                   <tr key={index} className="hover:bg-primary">
-                    <td className="text-right">{order.token0Amount}</td>
+                    <td >{order.token0Amount}</td>
                     <td className="text-right" style={{ color: order.orderTypeClass }}>{order.tokenPrice}</td>
                     <td className="text-right">{order.token1Amount}</td>
                   </tr>

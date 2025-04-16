@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { RootState } from "../../store";
 import { Order } from "../../types/exchange";
 
-interface DecoratedOrder extends Omit<Order, "tokenPrice"> {
+export interface DecoratedOrder extends Omit<Order, "tokenPrice"> {
   tokenPrice: number;
   formattedTimestamp: string;
   orderType: string;
@@ -27,7 +27,7 @@ const selectFilledOrders = (state: RootState) =>
   state.exchange.orderBook.filledOrders;
 const selectSelectedMarket = (state: RootState) =>
   state.exchange.selectedMarket;
-
+const selectAccount = (state: RootState) => state.provider.account;
 // Open orders selector
 export const selectOpenOrders = createSelector(
   [
@@ -319,4 +319,55 @@ const tokenPriceClass = (
   } else {
     return RED; // danger
   }
+};
+
+// ------------------------------------------------------------------------------
+// MY OPEN ORDERS
+
+export const myOpenOrdersSelector = createSelector(
+  [selectAccount, selectTokens, selectOpenOrders],
+  (account, tokens, orders) => {
+    if (!tokens[0] || !tokens[1]) {
+      return [];
+    }
+
+    // Filter orders created by current account
+    orders = orders.filter((o) => o.user === account);
+
+    // Filter orders by token addresses
+    orders = orders.filter(
+      (o) => o.tokenGet === tokens[0] || o.tokenGet === tokens[1]
+    );
+    orders = orders.filter(
+      (o) => o.tokenGive === tokens[0] || o.tokenGive === tokens[1]
+    );
+
+    // Decorate orders - add display attributes
+    const decoratedOrders = decorateMyOpenOrders(orders, tokens);
+
+    // Sort orders by date descending
+    return decoratedOrders.sort(
+      (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
+    );
+  }
+);
+
+const decorateMyOpenOrders = (orders: Order[], tokens: string[]): DecoratedOrder[] => {
+  return orders.map((order: Order) => {
+    const decorated = decorateOrder(order, tokens);
+    return decorateMyOpenOrder(decorated, tokens);
+  });
+};
+
+const decorateMyOpenOrder = (
+  order: DecoratedOrder,
+  tokens: string[]
+): DecoratedOrder => {
+  const orderType = order.tokenGive === tokens[1] ? "buy" : "sell";
+
+  return {
+    ...order,
+    orderType,
+    orderTypeClass: orderType === "buy" ? GREEN : RED
+  };
 };

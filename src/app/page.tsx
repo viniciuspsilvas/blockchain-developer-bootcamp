@@ -28,6 +28,7 @@ import { Order } from "../components/order";
 import { OrderBook } from "../components/orderBook";
 import { PriceChart } from "../components/priceChart";
 import { Trades } from "../components/trades";
+import { Transactions } from "../components/transactions";
 
 declare global {
   interface Window {
@@ -220,8 +221,14 @@ export default function Home() {
         {/* Right Section */}
         <section className="grid bg-primary p-8 col-span-9 gap-8">
           <PriceChart />
-          {/* Transactions */}
-          <Trades />
+          <div className="grid grid-cols-2 gap-8">
+            <div className="h-[250px] overflow-y-auto">
+              <Transactions />
+            </div>
+            <div className="h-[250px] overflow-y-auto">
+              <Trades />
+            </div>
+          </div>
           <OrderBook />
         </section>
       </main>
