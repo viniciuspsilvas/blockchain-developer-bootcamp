@@ -89,9 +89,9 @@ export const Order: FC = () => {
 
         <button
           type="submit"
-          className="px-4 py-2 border border-blue text-blue rounded-md hover:bg-blue hover:text-white transition-colors duration-200"
+          className="px-4 py-2 border border-blue text-white rounded-md bg-blue hover:border-white transition-colors duration-200"
         >
-          {isBuy ? "Place Buy Order" : "Place Sell Order"}
+          {isBuy ? "Buy Order" : "Sell Order"}
         </button>
       </form>
     </div>

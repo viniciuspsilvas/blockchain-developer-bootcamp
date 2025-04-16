@@ -26,6 +26,7 @@ import { Balance } from "../components/balance";
 import EXCHANGE_ABI from "../abis/Exchange.json";
 import { Order } from "../components/order";
 import { OrderBook } from "../components/orderBook";
+import { PriceChart } from "../components/priceChart";
 
 declare global {
   interface Window {
@@ -216,8 +217,8 @@ export default function Home() {
           <Order />
         </section>
         {/* Right Section */}
-        <section className="grid bg-primary p-8 col-span-9">
-          {/* PriceChart */}
+        <section className="grid bg-primary p-8 col-span-9 gap-8">
+          <PriceChart />
           {/* Transactions */}
           {/* Trades */}
           <OrderBook />

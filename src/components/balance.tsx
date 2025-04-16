@@ -192,12 +192,12 @@ export const Balance: FC = () => {
             <small className="text-neutral">Wallet</small>
             <br />
 
-            {tokenBalances && Number(tokenBalances[0]).toFixed(4)}
+            {tokenBalances && Number(tokenBalances[0]).toFixed(1)}
           </p>
           <p className="text-sm">
             <small className="text-neutral">Exchange</small>
             <br />
-            {exchangeBalances && Number(exchangeBalances[0]).toFixed(4)}
+            {exchangeBalances && Number(exchangeBalances[0]).toFixed(1)}
           </p>
         </div>
 
@@ -250,12 +250,12 @@ export const Balance: FC = () => {
             <small className="text-neutral">Wallet</small>
             <br />
 
-            {tokenBalances && Number(tokenBalances[1]).toFixed(4)}
+            {tokenBalances && Number(tokenBalances[1]).toFixed(1)}
           </p>
           <p className="text-sm">
             <small className="text-neutral">Exchange</small>
             <br />
-            {exchangeBalances && Number(exchangeBalances[1]).toFixed(4)}
+            {exchangeBalances && Number(exchangeBalances[1]).toFixed(1)}
           </p>
         </div>
 
