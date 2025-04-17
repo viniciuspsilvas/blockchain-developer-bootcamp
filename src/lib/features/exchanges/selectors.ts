@@ -3,16 +3,7 @@ import { get, groupBy, reject, maxBy, minBy } from "lodash";
 import moment from "moment";
 import { ethers } from "ethers";
 import { RootState } from "../../store";
-import { Order } from "../../types/exchange";
-
-export interface DecoratedOrder extends Omit<Order, "tokenPrice"> {
-  tokenPrice: number;
-  formattedTimestamp: string;
-  orderType: string;
-  orderTypeClass: string;
-  orderFillAction: string;
-  tokenPriceClass?: string;
-}
+import { Order } from "../../../types/exchange";
 
 const GREEN = "#25CE8F";
 const RED = "#F45353";
@@ -67,7 +58,7 @@ export const selectOpenOrders = createSelector(
 );
 
 // Helper function to decorate a single order
-const decorateOrder = (order: Order, addresses: string[]): DecoratedOrder => {
+const decorateOrder = (order: Order, addresses: string[]): Order => {
   if (!order.amountGet || !order.amountGive) {
     throw new Error("Order amounts are required");
   }
@@ -90,21 +81,20 @@ const decorateOrder = (order: Order, addresses: string[]): DecoratedOrder => {
     ...order,
     token1Amount: ethers.utils.formatUnits(token1Amount, "ether"),
     token0Amount: ethers.utils.formatUnits(token0Amount, "ether"),
-    tokenPrice,
+    tokenPrice: tokenPrice.toString(),
     formattedTimestamp: order.timestamp
       ? moment.unix(order.timestamp).format("h:mm:ssa d MMM D")
       : "",
     orderType: "",
-    orderTypeClass: "",
     orderFillAction: ""
   };
 };
 
 // Helper function to decorate order book orders
 const decorateOrderBookOrder = (
-  order: DecoratedOrder,
+  order: Order,
   addresses: string[]
-): DecoratedOrder => {
+): Order => {
   const orderType = order.tokenGive === addresses[1] ? "buy" : "sell";
 
   return {
@@ -139,10 +129,10 @@ export const selectOrderBook = createSelector(
     const groupedOrders = groupBy(decoratedOrders, "orderType");
 
     const buyOrders = get(groupedOrders, "buy", []).sort(
-      (a, b) => b.tokenPrice - a.tokenPrice
+      (a, b) => Number(b.tokenPrice) - Number(a.tokenPrice)
     );
     const sellOrders = get(groupedOrders, "sell", []).sort(
-      (a, b) => b.tokenPrice - a.tokenPrice
+      (a, b) => Number(b.tokenPrice) - Number(a.tokenPrice)
     );
 
     return {
@@ -201,7 +191,7 @@ export const priceChartSelector = createSelector(
   }
 );
 
-const buildGraphData = (orders: DecoratedOrder[]) => {
+const buildGraphData = (orders: Order[]) => {
   // Group the orders by hour for the graph
   const groupedOrders = groupBy(orders, (o) =>
     moment
@@ -227,10 +217,10 @@ const buildGraphData = (orders: DecoratedOrder[]) => {
     return {
       x: new Date(hour),
       y: [
-        open.tokenPrice,
-        high?.tokenPrice ?? 0,
-        low?.tokenPrice ?? 0,
-        close.tokenPrice
+        Number(open.tokenPrice),
+        Number(high?.tokenPrice) ?? 0,
+        Number(low?.tokenPrice) ?? 0,
+        Number(close.tokenPrice)
       ]
     };
   });
@@ -273,11 +263,11 @@ export const filledOrdersSelector = createSelector(
 const decorateFilledOrders = (
   orders: Order[],
   tokens: string[]
-): DecoratedOrder[] => {
+): Order[] => {
   if (orders.length === 0) return [];
 
   // Track previous order to compare history
-  let previousOrder: DecoratedOrder = decorateOrder(orders[0], tokens);
+  let previousOrder: Order = decorateOrder(orders[0], tokens);
 
   return orders.map((order: Order) => {
     // decorate each individual order
@@ -289,13 +279,13 @@ const decorateFilledOrders = (
 };
 
 const decorateFilledOrder = (
-  order: DecoratedOrder,
-  previousOrder: DecoratedOrder
-): DecoratedOrder => {
+  order: Order,
+  previousOrder: Order
+): Order => {
   return {
     ...order,
     tokenPriceClass: tokenPriceClass(
-      order.tokenPrice,
+      Number(order.tokenPrice),
       order.id || "",
       previousOrder
     )
@@ -305,7 +295,7 @@ const decorateFilledOrder = (
 const tokenPriceClass = (
   tokenPrice: number,
   orderId: string,
-  previousOrder: DecoratedOrder
+  previousOrder: Order
 ): string => {
   // Show green price if only one order exists
   if (previousOrder.id === orderId) {
@@ -314,7 +304,7 @@ const tokenPriceClass = (
 
   // Show green price if order price higher than previous order
   // Show red price if order price lower than previous order
-  if (previousOrder.tokenPrice <= tokenPrice) {
+  if (Number(previousOrder.tokenPrice) <= tokenPrice) {
     return GREEN; // success
   } else {
     return RED; // danger
@@ -352,7 +342,7 @@ export const myOpenOrdersSelector = createSelector(
   }
 );
 
-const decorateMyOpenOrders = (orders: Order[], tokens: string[]): DecoratedOrder[] => {
+const decorateMyOpenOrders = (orders: Order[], tokens: string[]): Order[] => {
   return orders.map((order: Order) => {
     const decorated = decorateOrder(order, tokens);
     return decorateMyOpenOrder(decorated, tokens);
@@ -360,14 +350,79 @@ const decorateMyOpenOrders = (orders: Order[], tokens: string[]): DecoratedOrder
 };
 
 const decorateMyOpenOrder = (
-  order: DecoratedOrder,
+  order: Order,
   tokens: string[]
-): DecoratedOrder => {
+): Order => {
   const orderType = order.tokenGive === tokens[1] ? "buy" : "sell";
 
   return {
     ...order,
     orderType,
-    orderTypeClass: orderType === "buy" ? GREEN : RED
+    orderTypeClass: orderType === "buy" ? GREEN : RED,
+    orderFillAction: orderType === "buy" ? "sell" : "buy",
+    orderSign: orderType === "buy" ? "+" : "-"
+  };
+};
+
+
+// ------------------------------------------------------------------------------
+// MY FILLED ORDERS
+
+export const myFilledOrdersSelector = createSelector(
+  [selectAccount, selectTokens, selectFilledOrders],
+  (account, tokens, orders) => {
+    if (!tokens[0] || !tokens[1] || !account) {
+      return [];
+    }
+
+    console.log(orders);
+    // Find our orders
+    orders = orders.filter((o: Order) => o.user === account || o.creator === account);
+    // Filter orders for current trading pair
+    orders = orders.filter(
+      (o: Order) => o.tokenGet === tokens[0] || o.tokenGet === tokens[1]
+    );
+    orders = orders.filter(
+      (o: Order) => o.tokenGive === tokens[0] || o.tokenGive === tokens[1]
+    );
+
+    // Sort by date descending
+    orders = orders.sort((a: Order, b: Order) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    // Decorate orders - add display attributes
+    const decoratedOrders = decorateMyFilledOrders(orders, account, tokens);
+
+    return decoratedOrders;
+  }
+);
+
+const decorateMyFilledOrders = (
+  orders: Order[],
+  account: string,
+  tokens: string[]
+): Order[] => {
+  return orders.map((order: Order) => {
+    const decorated = decorateOrder(order, tokens);
+    return decorateMyFilledOrder(decorated, account, tokens);
+  });
+};
+
+const decorateMyFilledOrder = (
+  order: Order,
+  account: string,
+  tokens: string[]
+): Order => {
+  const myOrder = order.creator === account;
+
+  const orderType = myOrder
+    ? order.tokenGive === tokens[1] ? "buy" : "sell"
+    : order.tokenGive === tokens[1] ? "sell" : "buy";
+
+  return {
+    ...order,
+    orderType,
+    orderTypeClass: orderType === "buy" ? GREEN : RED,
+    orderFillAction: orderType === "buy" ? "sell" : "buy",
+    orderSign: orderType === "buy" ? "+" : "-"
   };
 };

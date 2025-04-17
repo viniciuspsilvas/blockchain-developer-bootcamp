@@ -1,16 +1,17 @@
 import { Event } from "ethers";
-import { Order } from "../types/exchange";
+import { Order } from "../../types/exchange";
 
 export const mapEventToOrder = (event: Event): Order => {
   if (!event.args) {
     throw new Error('Event args are undefined');
   }
 
-  const { id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp } = event.args;
+  const { id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, creator } = event.args;
   
   return {
     id: id?.toString(),
     user,
+    creator,
     tokenGet,
     amountGet,
     tokenGive,

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
-import { Order } from "../../types/exchange";
 import { selectOrderBook, selectOpenOrders } from "./selectors";
+import { Order } from "@/src/types/exchange";
 
 interface ExchangeState {
   address?: string;
@@ -33,7 +33,6 @@ const initialState: ExchangeState = {
     filledOrders: []
   }
 };
-
 
 export const ExchangeSlice = createSlice({
   name: "Exchange",
@@ -93,7 +92,10 @@ export const ExchangeSlice = createSlice({
       state.transaction = { type: "New Order", isPending: true };
       state.transferInProgress = true;
     },
-    orderSuccess: (state, { payload: { order } }: PayloadAction<{ order: Order }>) => {
+    orderSuccess: (
+      state,
+      { payload: { order } }: PayloadAction<{ order: Order }>
+    ) => {
       // Prevent duplicate orders
       const index = state.orderBook.allOrders.findIndex(
         (o) => o?.id?.toString() === order?.id?.toString()

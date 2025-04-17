@@ -8,6 +8,7 @@ import { setSelectedMarket } from "../lib/features/exchanges/exchangeSlice";
 import sort from "../assets/sort.svg";
 import Image from "next/image";
 import { filledOrdersSelector } from "../lib/features/exchanges/selectors";
+import { Order } from "../types/exchange";
 import { Banner } from "./Banner";
 
 export const Trades: FC = () => {
@@ -46,7 +47,7 @@ export const Trades: FC = () => {
         <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
           <thead>
             <tr className="text-gray-500 text-xs">
-              <th >
+              <th>
                 Time
                 <Image
                   src={sort}
@@ -79,7 +80,7 @@ export const Trades: FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filledOrders.map((order) => {
+            {filledOrders.map((order: Order) => {
               return (
                 <tr key={order.id}>
                   <td>{order.formattedTimestamp}</td>
