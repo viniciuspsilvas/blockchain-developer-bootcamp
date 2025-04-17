@@ -375,7 +375,6 @@ export const myFilledOrdersSelector = createSelector(
       return [];
     }
 
-    console.log(orders);
     // Find our orders
     orders = orders.filter((o: Order) => o.user === account || o.creator === account);
     // Filter orders for current trading pair

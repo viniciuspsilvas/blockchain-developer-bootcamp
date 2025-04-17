@@ -166,15 +166,43 @@ export const ExchangeSlice = createSlice({
     },
 
     // FILL ORDER
+    fillOrderRequest: (state) => {
+      state.transaction = { type: "Fill Order", isPending: true };
+      state.transferInProgress = true;
+    },
+
     fillOrderSuccess: (
       state,
       { payload: { order } }: PayloadAction<{ order: Order }>
     ) => {
-      // Remove from allOrders and add to filledOrders
-      state.orderBook.allOrders = state.orderBook.allOrders.filter(
-        (o) => o.id !== order.id
+      // Prevent duplicate orders
+      const index = state.orderBook.filledOrders.findIndex(
+        (o) => o?.id?.toString() === order?.id?.toString()
       );
-      state.orderBook.filledOrders = [...state.orderBook.filledOrders, order];
+
+      let data;
+
+      if (index === -1) {
+        data = [...state.orderBook.filledOrders, order];
+      } else {
+        data = state.orderBook.filledOrders;
+      }
+
+      state.transaction = {
+        type: "Fill Order",
+        isPending: false,
+        isSuccessful: true
+      };
+      state.transferInProgress = false;
+      state.orderBook.filledOrders = data;
+    },
+
+    fillOrderFail: (state) => {
+      state.transaction = {
+        type: "Fill Order",
+        isPending: false,
+        isError: true
+      };
     },
 
     // SET SELECTED MARKET
@@ -200,7 +228,9 @@ export const {
   cancelOrderRequest,
   cancelOrderSuccess,
   cancelOrderFail,
+  fillOrderRequest,
   fillOrderSuccess,
+  fillOrderFail,
   setSelectedMarket
 } = ExchangeSlice.actions;
 

@@ -6,10 +6,13 @@ import {
   selectExchangeBalances,
   newOrderRequest,
   cancelOrderFail,
-  cancelOrderRequest
+  cancelOrderRequest,
+  fillOrderRequest,
+  fillOrderFail
 } from "../features/exchanges/exchangeSlice";
 import EXCHANGE_ABI from "../../abis/Exchange.json";
 import { selectProvider } from "../features/providers/providerSlice";
+import { Order } from "@/src/types/exchange";
 
 interface OrderResult {
   success: boolean;
@@ -125,10 +128,40 @@ export const useExchange = () => {
     }
   };
 
+  const fillOrder = async (order: Order) => {
+    if (!exchange || !provider) {
+      return {
+        success: false,
+        error: "Exchange or Provider is not available"
+      };
+    }
+
+    try {
+      dispatch(fillOrderRequest());
+
+      const signer = provider.getSigner();
+      const transaction = await exchange.connect(signer).fillOrder(order.id);
+
+      const receipt = await transaction.wait();
+
+      return {
+        success: true,
+        receipt
+      };
+    } catch (error) {
+      dispatch(fillOrderFail());
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred"
+      };
+    }
+  };
+
   return {
     exchange,
     balances,
     makeBuyOrder,
-    cancelOrder
+    cancelOrder,
+    fillOrder
   };
 };

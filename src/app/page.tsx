@@ -16,7 +16,8 @@ import {
   loadAllOrderBook,
   transferSuccess,
   orderSuccess,
-  cancelOrderSuccess
+  cancelOrderSuccess,
+  fillOrderSuccess
 } from "../lib/features/exchanges/exchangeSlice";
 import { filterAndMapEvents } from "../lib/utils/eventMappers";
 
@@ -131,11 +132,13 @@ export default function Home() {
           filterAndMapEvents(orderStream)
         ];
 
-        dispatch(loadAllOrderBook({ 
-          allOrders,
-          cancelledOrders,
-          filledOrders
-        }));
+        dispatch(
+          loadAllOrderBook({
+            allOrders,
+            cancelledOrders,
+            filledOrders
+          })
+        );
 
         // Listen to events
         exchange.on("Deposit", () => {
@@ -148,41 +151,53 @@ export default function Home() {
 
         exchange.on(
           "Order",
-          (id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, event) => {
-            const order = {
-              id: id.toString(),
-              user,
-              tokenGet,
-              amountGet,
-              tokenGive,
-              amountGive,
-              timestamp,
-              token0Amount: amountGet.toString(),
-              token1Amount: amountGive.toString(),
-              tokenPrice: (amountGet / amountGive).toString(),
-              orderTypeClass: event.args?.orderTypeClass
-            };
+          (
+            id,
+            user,
+            tokenGet,
+            amountGet,
+            tokenGive,
+            amountGive,
+            timestamp,
+            event
+          ) => {
+            const order = event.args;
             dispatch(orderSuccess({ order }));
           }
         );
 
         exchange.on(
           "Cancel",
-          (id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, event) => {
-            const order = {
-              id: id.toString(),
-              user,
-              tokenGet,
-              amountGet,
-              tokenGive,
-              amountGive,
-              timestamp,
-              token0Amount: amountGet.toString(),
-              token1Amount: amountGive.toString(),
-              tokenPrice: (amountGet / amountGive).toString(),
-              orderTypeClass: event.args?.orderTypeClass
-            };
+          (
+            id,
+            user,
+            tokenGet,
+            amountGet,
+            tokenGive,
+            amountGive,
+            timestamp,
+            event
+          ) => {
+            const order = event.args;
             dispatch(cancelOrderSuccess({ order }));
+          }
+        );
+
+        exchange.on(
+          "Trade",
+          (
+            id,
+            user,
+            tokenGet,
+            amountGet,
+            tokenGive,
+            amountGive,
+            creator,
+            timestamp,
+            event
+          ) => {
+            const order = event.args;
+            dispatch(fillOrderSuccess({ order }));
           }
         );
 
