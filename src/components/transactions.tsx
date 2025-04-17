@@ -1,8 +1,6 @@
 import { FC, useState } from "react";
 import { useSelector } from "react-redux";
-import {
-  selectTokenSymbols
-} from "../lib/features/tokens/tokensSlice";
+import { selectTokenSymbols } from "../lib/features/tokens/tokensSlice";
 import sort from "../assets/sort.svg";
 import Image from "next/image";
 import {
@@ -12,14 +10,23 @@ import {
 import { Order } from "../types/exchange";
 import { Banner } from "./Banner";
 import ToggleButtonGroup from "./ToggleButtonGroup";
+import { useExchange } from "../lib/hooks/useExchange";
 
 export const Transactions: FC = () => {
   const symbols = useSelector(selectTokenSymbols);
   const [activeOption, setActiveOption] = useState("Orders");
+  const { cancelOrder } = useExchange();
 
   const myOpenOrders = useSelector(myOpenOrdersSelector);
   const myFilledOrders = useSelector(myFilledOrdersSelector);
 
+  const cancelHandler = (order: Order) => {
+    if (order.id) {
+      cancelOrder(Number(order.id));
+    } else {
+      console.error("No order ID found");
+    }
+  };
 
   return (
     <div className="bg-secondary rounded-md p-4 h-full">
@@ -63,6 +70,7 @@ export const Transactions: FC = () => {
                       className="inline-block ml-2"
                     />
                   </th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -73,6 +81,14 @@ export const Transactions: FC = () => {
                         {order.token0Amount}
                       </td>
                       <td className="text-right">{order.tokenPrice}</td>
+                      <td>
+                        <button
+                          className="px-2  ml-2 border border-blue text-blue rounded-md text-sm hover:border-white hover:text-white transition-all duration-300"
+                          onClick={() => cancelHandler(order)}
+                        >
+                          Cancel
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -90,15 +106,33 @@ export const Transactions: FC = () => {
                 <tr>
                   <th>
                     Time
-                    <Image src={sort} alt="Sort" width={16} height={16} className="inline-block ml-2" />
+                    <Image
+                      src={sort}
+                      alt="Sort"
+                      width={16}
+                      height={16}
+                      className="inline-block ml-2"
+                    />
                   </th>
                   <th>
                     {symbols && symbols[0]}
-                    <Image src={sort} alt="Sort" width={16} height={16} className="inline-block ml-2" />
+                    <Image
+                      src={sort}
+                      alt="Sort"
+                      width={16}
+                      height={16}
+                      className="inline-block ml-2"
+                    />
                   </th>
                   <th>
                     {symbols && symbols[0]}/{symbols && symbols[1]}
-                    <Image src={sort} alt="Sort" width={16} height={16} className="inline-block ml-2" />
+                    <Image
+                      src={sort}
+                      alt="Sort"
+                      width={16}
+                      height={16}
+                      className="inline-block ml-2"
+                    />
                   </th>
                 </tr>
               </thead>

@@ -4,7 +4,9 @@ import {
   orderFail,
   selectExchangeAddress,
   selectExchangeBalances,
-  newOrderRequest
+  newOrderRequest,
+  cancelOrderFail,
+  cancelOrderRequest
 } from "../features/exchanges/exchangeSlice";
 import EXCHANGE_ABI from "../../abis/Exchange.json";
 import { selectProvider } from "../features/providers/providerSlice";
@@ -76,15 +78,11 @@ export const useExchange = () => {
         .makeOrder(tokenGet, amountGet, tokenGive, amountGive);
 
       const receipt = await transaction.wait();
-      console.log("✅ Order made successfully!");
-
-      // dispatch(orderSuccess());
       return {
         success: true,
         receipt
       };
     } catch (error) {
-      console.error("❌ Order failed:", error);
       dispatch(orderFail());
       return {
         success: false,
@@ -107,22 +105,19 @@ export const useExchange = () => {
     }
 
     try {
-      dispatch(newOrderRequest());
+      dispatch(cancelOrderRequest());
 
       const signer = provider.getSigner();
       const transaction = await exchange.connect(signer).cancelOrder(orderId);
 
       const receipt = await transaction.wait();
-      console.log("✅ Order cancelled successfully!");
 
-      // dispatch(orderSuccess());
       return {
         success: true,
         receipt
       };
     } catch (error) {
-      console.error("❌ Order cancellation failed:", error);
-      dispatch(orderFail());
+      dispatch(cancelOrderFail());
       return {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error occurred"

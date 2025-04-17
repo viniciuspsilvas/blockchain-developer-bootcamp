@@ -15,7 +15,8 @@ import {
   loadExchange,
   loadAllOrderBook,
   transferSuccess,
-  orderSuccess
+  orderSuccess,
+  cancelOrderSuccess
 } from "../lib/features/exchanges/exchangeSlice";
 import { filterAndMapEvents } from "../lib/utils/eventMappers";
 
@@ -181,7 +182,7 @@ export default function Home() {
               tokenPrice: (amountGet / amountGive).toString(),
               orderTypeClass: event.args?.orderTypeClass
             };
-            dispatch(orderSuccess({ order }));
+            dispatch(cancelOrderSuccess({ order }));
           }
         );
 

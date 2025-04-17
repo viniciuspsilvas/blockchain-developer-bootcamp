@@ -126,7 +126,16 @@ export const ExchangeSlice = createSlice({
       state.transferInProgress = false;
     },
 
-    // CANCEL ORDER
+    // ------------------------------------------------------------------------------
+    // CANCELLING ORDERS
+    cancelOrderRequest: (state) => {
+      state.transaction = {
+        type: "Cancel",
+        isPending: true,
+        isSuccessful: false
+      };
+      state.transferInProgress = true;
+    },
     cancelOrderSuccess: (
       state,
       { payload: { order } }: PayloadAction<{ order: Order }>
@@ -139,6 +148,21 @@ export const ExchangeSlice = createSlice({
         ...state.orderBook.cancelledOrders,
         order
       ];
+      state.transaction = {
+        type: "Cancel",
+        isPending: false,
+        isSuccessful: true
+      };
+      // state.events = [event, ...(state.events || [])];
+    },
+    cancelOrderFail: (state) => {
+      state.transaction = {
+        type: "Cancel",
+        isPending: false,
+        isSuccessful: false,
+        isError: true
+      };
+      state.transferInProgress = false;
     },
 
     // FILL ORDER
@@ -173,7 +197,9 @@ export const {
   newOrderRequest,
   orderSuccess,
   orderFail,
+  cancelOrderRequest,
   cancelOrderSuccess,
+  cancelOrderFail,
   fillOrderSuccess,
   setSelectedMarket
 } = ExchangeSlice.actions;
