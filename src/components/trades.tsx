@@ -44,58 +44,64 @@ export const Trades: FC = () => {
       {!filledOrders || filledOrders.length === 0 ? (
         <Banner text="No Transactions" />
       ) : (
-        <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
-          <thead>
-            <tr className="text-gray-500 text-xs">
-              <th>
-                Time
-                <Image
-                  src={sort}
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="inline-block ml-2"
-                />
-              </th>
-              <th className="text-right">
-                {symbols && symbols[0]}
-                <Image
-                  src={sort}
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="inline-block ml-2"
-                />
-              </th>
-              <th className="text-right">
-                {symbols && symbols[0]}/{symbols && symbols[1]}
-                <Image
-                  src={sort}
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="inline-block ml-2"
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filledOrders.map((order: Order) => {
-              return (
-                <tr key={order.id}>
-                  <td>{order.formattedTimestamp}</td>
-                  <td
-                    className="text-right"
-                    style={{ color: `${order.tokenPriceClass}` }}
-                  >
-                    {order.token0Amount}
-                  </td>
-                  <td className="text-right">{order.tokenPrice}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="relative">
+          <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
+            <thead className="sticky top-0 bg-blue-500">
+              <tr className="text-gray-500 text-xs">
+                <th>
+                  Time
+                  <Image
+                    src={sort}
+                    alt="Sort"
+                    width={16}
+                    height={16}
+                    className="inline-block ml-2"
+                  />
+                </th>
+                <th className="text-right">
+                  {symbols && symbols[0]}
+                  <Image
+                    src={sort}
+                    alt="Sort"
+                    width={16}
+                    height={16}
+                    className="inline-block ml-2"
+                  />
+                </th>
+                <th className="text-right">
+                  {symbols && symbols[0]}/{symbols && symbols[1]}
+                  <Image
+                    src={sort}
+                    alt="Sort"
+                    width={16}
+                    height={16}
+                    className="inline-block ml-2"
+                  />
+                </th>
+              </tr>
+            </thead>
+          </table>
+          <div className="h-[200px] overflow-y-auto">
+            <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
+              <tbody>
+                {filledOrders.map((order: Order) => {
+                  return (
+                    <tr key={order.id}>
+                      <td>{order.formattedTimestamp}</td>
+                      <td
+                        className="text-right"
+                        style={{ color: `${order.tokenPriceClass}` }}
+                      >
+                        {order.token0Amount}
+                      </td>
+                      <td className="text-right">{order.tokenPrice}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
     </div>
   );

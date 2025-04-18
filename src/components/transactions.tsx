@@ -47,53 +47,59 @@ export const Transactions: FC = () => {
           {!myOpenOrders || myOpenOrders.length === 0 ? (
             <Banner text="No Open Orders" />
           ) : (
-            <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
-              <thead>
-                <tr className="text-gray-500 text-xs">
-                  <th>
-                    {symbols && symbols[0]}
-                    <Image
-                      src={sort}
-                      alt="Sort"
-                      width={16}
-                      height={16}
-                      className="inline-block ml-2"
-                    />
-                  </th>
-                  <th className="text-right">
-                    {symbols && symbols[0]}/{symbols && symbols[1]}
-                    <Image
-                      src={sort}
-                      alt="Sort"
-                      width={16}
-                      height={16}
-                      className="inline-block ml-2"
-                    />
-                  </th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {myOpenOrders.map((order: Order) => {
-                  return (
-                    <tr key={order.id}>
-                      <td style={{ color: `${order.orderTypeClass}` }}>
-                        {order.token0Amount}
-                      </td>
-                      <td className="text-right">{order.tokenPrice}</td>
-                      <td>
-                        <button
-                          className="px-2  ml-2 border border-blue text-blue rounded-md text-sm hover:border-white hover:text-white transition-all duration-300"
-                          onClick={() => cancelHandler(order)}
-                        >
-                          Cancel
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="relative">
+              <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
+                <thead className="sticky top-0 bg-blue-500">
+                  <tr className="text-gray-500 text-xs">
+                    <th>
+                      {symbols && symbols[0]}
+                      <Image
+                        src={sort}
+                        alt="Sort"
+                        width={16}
+                        height={16}
+                        className="inline-block ml-2"
+                      />
+                    </th>
+                    <th className="text-right">
+                      {symbols && symbols[0]}/{symbols && symbols[1]}
+                      <Image
+                        src={sort}
+                        alt="Sort"
+                        width={16}
+                        height={16}
+                        className="inline-block ml-2"
+                      />
+                    </th>
+                    <th />
+                  </tr>
+                </thead>
+              </table>
+              <div className="h-[200px] overflow-y-auto">
+                <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
+                  <tbody>
+                    {myOpenOrders.map((order: Order) => {
+                      return (
+                        <tr key={order.id}>
+                          <td style={{ color: `${order.orderTypeClass}` }}>
+                            {order.token0Amount}
+                          </td>
+                          <td className="text-right">{order.tokenPrice}</td>
+                          <td>
+                            <button
+                              className="px-2  ml-2 border border-blue text-blue rounded-md text-sm hover:border-white hover:text-white transition-all duration-300"
+                              onClick={() => cancelHandler(order)}
+                            >
+                              Cancel
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </>
       ) : (
@@ -101,57 +107,63 @@ export const Transactions: FC = () => {
           {!myFilledOrders || myFilledOrders.length === 0 ? (
             <Banner text="No Filled Orders" />
           ) : (
-            <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
-              <thead>
-                <tr>
-                  <th>
-                    Time
-                    <Image
-                      src={sort}
-                      alt="Sort"
-                      width={16}
-                      height={16}
-                      className="inline-block ml-2"
-                    />
-                  </th>
-                  <th>
-                    {symbols && symbols[0]}
-                    <Image
-                      src={sort}
-                      alt="Sort"
-                      width={16}
-                      height={16}
-                      className="inline-block ml-2"
-                    />
-                  </th>
-                  <th>
-                    {symbols && symbols[0]}/{symbols && symbols[1]}
-                    <Image
-                      src={sort}
-                      alt="Sort"
-                      width={16}
-                      height={16}
-                      className="inline-block ml-2"
-                    />
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {myFilledOrders &&
-                  myFilledOrders.map((order, index) => {
-                    return (
-                      <tr key={index}>
-                        <td>{order.formattedTimestamp}</td>
-                        <td style={{ color: `${order.orderTypeClass}` }}>
-                          {order.orderSign}
-                          {order.token0Amount}
-                        </td>
-                        <td>{order.tokenPrice}</td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
+            <div className="relative">
+              <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
+                <thead className="sticky top-0 bg-blue-500">
+                  <tr>
+                    <th>
+                      Time
+                      <Image
+                        src={sort}
+                        alt="Sort"
+                        width={16}
+                        height={16}
+                        className="inline-block ml-2"
+                      />
+                    </th>
+                    <th>
+                      {symbols && symbols[0]}
+                      <Image
+                        src={sort}
+                        alt="Sort"
+                        width={16}
+                        height={16}
+                        className="inline-block ml-2"
+                      />
+                    </th>
+                    <th>
+                      {symbols && symbols[0]}/{symbols && symbols[1]}
+                      <Image
+                        src={sort}
+                        alt="Sort"
+                        width={16}
+                        height={16}
+                        className="inline-block ml-2"
+                      />
+                    </th>
+                  </tr>
+                </thead>
+              </table>
+              <div className="h-[200px] overflow-y-auto">
+                <table className="w-full rounded-md overflow-hidden text-left bg-blue-500">
+                  <tbody>
+                    {myFilledOrders &&
+                      myFilledOrders.map((order, index) => {
+                        return (
+                          <tr key={index}>
+                            <td>{order.formattedTimestamp}</td>
+                            <td style={{ color: `${order.orderTypeClass}` }}>
+                              {order.orderSign}
+                              {order.token0Amount}
+                            </td>
+                            <td>{order.tokenPrice}</td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </>
       )}

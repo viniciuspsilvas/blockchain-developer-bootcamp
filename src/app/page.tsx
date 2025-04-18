@@ -238,12 +238,8 @@ export default function Home() {
         <section className="grid bg-primary p-8 col-span-9 gap-8">
           <PriceChart />
           <div className="grid grid-cols-2 gap-8">
-            <div className="h-[250px] overflow-y-auto">
               <Transactions />
-            </div>
-            <div className="h-[250px] overflow-y-auto">
               <Trades />
-            </div>
           </div>
           <OrderBook />
         </section>
