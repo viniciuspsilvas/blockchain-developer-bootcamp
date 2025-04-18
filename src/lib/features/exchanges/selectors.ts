@@ -81,7 +81,7 @@ const decorateOrder = (order: Order, addresses: string[]): Order => {
     ...order,
     token1Amount: ethers.utils.formatUnits(token1Amount, "ether"),
     token0Amount: ethers.utils.formatUnits(token0Amount, "ether"),
-    tokenPrice: tokenPrice.toString(),
+    tokenPrice,
     formattedTimestamp: order.timestamp
       ? moment.unix(order.timestamp).format("h:mm:ssa d MMM D")
       : "",
@@ -91,10 +91,7 @@ const decorateOrder = (order: Order, addresses: string[]): Order => {
 };
 
 // Helper function to decorate order book orders
-const decorateOrderBookOrder = (
-  order: Order,
-  addresses: string[]
-): Order => {
+const decorateOrderBookOrder = (order: Order, addresses: string[]): Order => {
   const orderType = order.tokenGive === addresses[1] ? "buy" : "sell";
 
   return {
@@ -129,9 +126,11 @@ export const selectOrderBook = createSelector(
     const groupedOrders = groupBy(decoratedOrders, "orderType");
 
     const buyOrders = get(groupedOrders, "buy", []).sort(
+      // TODO: Check if this is correct, should it be from ether lib. BigNumber? 
       (a, b) => Number(b.tokenPrice) - Number(a.tokenPrice)
     );
     const sellOrders = get(groupedOrders, "sell", []).sort(
+      // TODO: Check if this is correct, should it be from ether lib. BigNumber? 
       (a, b) => Number(b.tokenPrice) - Number(a.tokenPrice)
     );
 
@@ -217,10 +216,10 @@ const buildGraphData = (orders: Order[]) => {
     return {
       x: new Date(hour),
       y: [
-        Number(open.tokenPrice),
-        Number(high?.tokenPrice) ?? 0,
-        Number(low?.tokenPrice) ?? 0,
-        Number(close.tokenPrice)
+        open.tokenPrice,
+        high?.tokenPrice ?? 0,
+        low?.tokenPrice ?? 0,
+        close.tokenPrice
       ]
     };
   });
@@ -260,10 +259,7 @@ export const filledOrdersSelector = createSelector(
   }
 );
 
-const decorateFilledOrders = (
-  orders: Order[],
-  tokens: string[]
-): Order[] => {
+const decorateFilledOrders = (orders: Order[], tokens: string[]): Order[] => {
   if (orders.length === 0) return [];
 
   // Track previous order to compare history
@@ -278,10 +274,7 @@ const decorateFilledOrders = (
   });
 };
 
-const decorateFilledOrder = (
-  order: Order,
-  previousOrder: Order
-): Order => {
+const decorateFilledOrder = (order: Order, previousOrder: Order): Order => {
   return {
     ...order,
     tokenPriceClass: tokenPriceClass(
@@ -349,10 +342,7 @@ const decorateMyOpenOrders = (orders: Order[], tokens: string[]): Order[] => {
   });
 };
 
-const decorateMyOpenOrder = (
-  order: Order,
-  tokens: string[]
-): Order => {
+const decorateMyOpenOrder = (order: Order, tokens: string[]): Order => {
   const orderType = order.tokenGive === tokens[1] ? "buy" : "sell";
 
   return {
@@ -363,7 +353,6 @@ const decorateMyOpenOrder = (
     orderSign: orderType === "buy" ? "+" : "-"
   };
 };
-
 
 // ------------------------------------------------------------------------------
 // MY FILLED ORDERS
@@ -376,7 +365,9 @@ export const myFilledOrdersSelector = createSelector(
     }
 
     // Find our orders
-    orders = orders.filter((o: Order) => o.user === account || o.creator === account);
+    orders = orders.filter(
+      (o: Order) => o.user === account || o.creator === account
+    );
     // Filter orders for current trading pair
     orders = orders.filter(
       (o: Order) => o.tokenGet === tokens[0] || o.tokenGet === tokens[1]
@@ -386,7 +377,9 @@ export const myFilledOrdersSelector = createSelector(
     );
 
     // Sort by date descending
-    orders = orders.sort((a: Order, b: Order) => (b.timestamp || 0) - (a.timestamp || 0));
+    orders = orders.sort(
+      (a: Order, b: Order) => (b.timestamp || 0) - (a.timestamp || 0)
+    );
 
     // Decorate orders - add display attributes
     const decoratedOrders = decorateMyFilledOrders(orders, account, tokens);
@@ -414,8 +407,12 @@ const decorateMyFilledOrder = (
   const myOrder = order.creator === account;
 
   const orderType = myOrder
-    ? order.tokenGive === tokens[1] ? "buy" : "sell"
-    : order.tokenGive === tokens[1] ? "sell" : "buy";
+    ? order.tokenGive === tokens[1]
+      ? "buy"
+      : "sell"
+    : order.tokenGive === tokens[1]
+    ? "sell"
+    : "buy";
 
   return {
     ...order,
