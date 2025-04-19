@@ -2,7 +2,7 @@ import { FC } from "react";
 import {
   loadAccount,
   selectAccount,
-  selectChainId,
+  selectNetwork,
   selectBalance
 } from "../lib/features/providers/providerSlice";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
@@ -18,7 +18,7 @@ export const Navbar: FC = () => {
   const dispatch = useAppDispatch();
 
   const account = useAppSelector(selectAccount);
-  const chainId = useAppSelector(selectChainId) || "0"; // Ensure it's always a string
+  const chainId = useAppSelector(selectNetwork) || "0"; // Ensure it's always a string
   const balance = useAppSelector(selectBalance);
 
   const connectHandler = async () => {
@@ -51,6 +51,7 @@ export const Navbar: FC = () => {
           width={35}
           height={35}
           className="mr-2"
+          style={{ width: 'auto', height: 'auto' }}
         />
         <h1>DApp Token Exchange</h1>
       </div>
@@ -62,6 +63,7 @@ export const Navbar: FC = () => {
           width={20}
           height={20}
           className=""
+          style={{ width: 'auto', height: 'auto' }}
         />
 
         <select

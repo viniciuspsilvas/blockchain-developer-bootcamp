@@ -20,6 +20,25 @@ interface ExchangeState {
     isError?: boolean;
   };
   transferInProgress: boolean;
+  events: {
+    id: string;
+    type: string;
+    timestamp: number;
+    user?: string;
+    transactionHash?: string;
+  }[];
+  autoClose: boolean;
+}
+
+interface Event {
+  id: string;
+  type: string;
+  timestamp: number;
+  args: {
+    user: string;
+  };
+  blockNumber: number;
+  transactionHash: string;
 }
 
 const initialState: ExchangeState = {
@@ -31,7 +50,9 @@ const initialState: ExchangeState = {
     allOrders: [],
     cancelledOrders: [],
     filledOrders: []
-  }
+  },
+  events: [],
+  autoClose: true
 };
 
 export const ExchangeSlice = createSlice({
@@ -74,13 +95,25 @@ export const ExchangeSlice = createSlice({
       state.transaction = { type: "Transfer", isPending: true };
       state.transferInProgress = true;
     },
-    transferSuccess: (state) => {
+    transferSuccess: (
+      state,
+      { payload: { event } }: PayloadAction<{ event?: Event }>
+    ) => {
       state.transaction = {
         type: "Transfer",
         isPending: false,
         isSuccessful: true
       };
       state.transferInProgress = false;
+      if (event) {
+        state.events = [{
+          id: event.id,
+          type: event.type,
+          timestamp: event.timestamp,
+          user: event.args?.user,
+          transactionHash: event.transactionHash
+        }, ...state.events];
+      }
     },
     transferFail: (state) => {
       state.transaction = { type: "Transfer", isPending: false, isError: true };
@@ -94,7 +127,7 @@ export const ExchangeSlice = createSlice({
     },
     orderSuccess: (
       state,
-      { payload: { order } }: PayloadAction<{ order: Order }>
+      { payload: { order, event } }: PayloadAction<{ order: Order; event?: Event }>
     ) => {
       // Prevent duplicate orders
       const index = state.orderBook.allOrders.findIndex(
@@ -116,6 +149,15 @@ export const ExchangeSlice = createSlice({
       };
       state.transferInProgress = false;
       state.orderBook.allOrders = data;
+      if (event) {
+        state.events = [{
+          id: event.id,
+          type: event.type,
+          timestamp: event.timestamp,
+          user: event.args?.user,
+          transactionHash: event.transactionHash
+        }, ...state.events];
+      }
     },
     orderFail: (state) => {
       state.transaction = {
@@ -138,7 +180,7 @@ export const ExchangeSlice = createSlice({
     },
     cancelOrderSuccess: (
       state,
-      { payload: { order } }: PayloadAction<{ order: Order }>
+      { payload: { order, event } }: PayloadAction<{ order: Order; event?: Event }>
     ) => {
       // Remove from allOrders and add to cancelledOrders
       state.orderBook.allOrders = state.orderBook.allOrders.filter(
@@ -153,7 +195,15 @@ export const ExchangeSlice = createSlice({
         isPending: false,
         isSuccessful: true
       };
-      // state.events = [event, ...(state.events || [])];
+      if (event) {
+        state.events = [{
+          id: event.id,
+          type: event.type,
+          timestamp: event.timestamp,
+          user: event.args?.user,
+          transactionHash: event.transactionHash
+        }, ...state.events];
+      }
     },
     cancelOrderFail: (state) => {
       state.transaction = {
@@ -173,7 +223,7 @@ export const ExchangeSlice = createSlice({
 
     fillOrderSuccess: (
       state,
-      { payload: { order } }: PayloadAction<{ order: Order }>
+      { payload: { order, event } }: PayloadAction<{ order: Order; event?: Event }>
     ) => {
       // Prevent duplicate orders
       const index = state.orderBook.filledOrders.findIndex(
@@ -195,6 +245,15 @@ export const ExchangeSlice = createSlice({
       };
       state.transferInProgress = false;
       state.orderBook.filledOrders = data;
+      if (event) {
+        state.events = [{
+          id: event.id,
+          type: event.type,
+          timestamp: event.timestamp,
+          user: event.args?.user,
+          transactionHash: event.transactionHash
+        }, ...state.events];
+      }
     },
 
     fillOrderFail: (state) => {
@@ -211,6 +270,11 @@ export const ExchangeSlice = createSlice({
       { payload: { market } }: PayloadAction<{ market: string }>
     ) => {
       state.selectedMarket = market;
+    },
+
+    // Add new action
+    toggleAutoClose: (state: ExchangeState) => {
+      state.autoClose = !state.autoClose;
     }
   }
 });
@@ -231,7 +295,8 @@ export const {
   fillOrderRequest,
   fillOrderSuccess,
   fillOrderFail,
-  setSelectedMarket
+  setSelectedMarket,
+  toggleAutoClose
 } = ExchangeSlice.actions;
 
 // Selectors
@@ -243,6 +308,7 @@ export const selectTransaction = (state: RootState) =>
   state.exchange.transaction;
 export const selectTransferInProgress = (state: RootState) =>
   state.exchange.transferInProgress;
+export const selectAutoClose = (state: RootState) => state.exchange.autoClose;
 
 // Re-export selectors
 export { selectOrderBook, selectOpenOrders };

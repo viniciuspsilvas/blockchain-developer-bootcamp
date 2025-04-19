@@ -17,4 +17,15 @@ export interface Order {
   orderClass?: string;
   orderSign?: string;
   tokenPriceClass?: string;
+}
+
+export interface Event {
+  id: string;
+  type: string;
+  timestamp: number;
+  args: {
+    user: string;
+  };
+  blockNumber: number;
+  transactionHash: string;
 } 

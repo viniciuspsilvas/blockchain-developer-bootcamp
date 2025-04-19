@@ -2,7 +2,7 @@ import { FC } from "react";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 import { loadTokens } from "../lib/features/tokens/tokensSlice";
 import {
-  selectChainId,
+  selectNetwork,
   selectProvider
 } from "../lib/features/providers/providerSlice";
 import configData from "../config.json";
@@ -15,7 +15,7 @@ export const config: ConfigType = configData;
 export const Markets: FC = () => {
   const dispatch = useAppDispatch();
   const provider = useAppSelector(selectProvider);
-  const chainId = useAppSelector(selectChainId) || "0"; // Ensure network is always a string
+  const chainId = useAppSelector(selectNetwork) || "0"; // Ensure network is always a string
 
   const marketHandler = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!provider) {

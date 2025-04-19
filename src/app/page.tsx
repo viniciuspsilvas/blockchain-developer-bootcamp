@@ -31,6 +31,7 @@ import { OrderBook } from "../components/orderBook";
 import { PriceChart } from "../components/priceChart";
 import { Trades } from "../components/trades";
 import { Transactions } from "../components/transactions";
+import { Alert } from "../components/alert";
 
 declare global {
   interface Window {
@@ -141,12 +142,12 @@ export default function Home() {
         );
 
         // Listen to events
-        exchange.on("Deposit", () => {
-          dispatch(transferSuccess());
+        exchange.on("Deposit", (token, user, amount, balance, event) => {
+          dispatch(transferSuccess({ event }));
         });
 
-        exchange.on("Withdraw", () => {
-          dispatch(transferSuccess());
+        exchange.on("Withdraw", (token, user, amount, balance, event) => {
+          dispatch(transferSuccess({ event }));
         });
 
         exchange.on(
@@ -162,7 +163,7 @@ export default function Home() {
             event
           ) => {
             const order = event.args;
-            dispatch(orderSuccess({ order }));
+            dispatch(orderSuccess({ order, event }));
           }
         );
 
@@ -179,7 +180,7 @@ export default function Home() {
             event
           ) => {
             const order = event.args;
-            dispatch(cancelOrderSuccess({ order }));
+            dispatch(cancelOrderSuccess({ order, event }));
           }
         );
 
@@ -197,7 +198,7 @@ export default function Home() {
             event
           ) => {
             const order = event.args;
-            dispatch(fillOrderSuccess({ order }));
+            dispatch(fillOrderSuccess({ order, event }));
           }
         );
 
@@ -226,6 +227,7 @@ export default function Home() {
   return (
     <div className="min-h-screen font-dm-sans text-white bg-primary">
       <Navbar />
+      <Alert />
 
       <main className="grid grid-cols-12">
         {/* Left Section */}
@@ -238,14 +240,12 @@ export default function Home() {
         <section className="grid bg-primary p-8 col-span-9 gap-8">
           <PriceChart />
           <div className="grid grid-cols-2 gap-8">
-              <Transactions />
-              <Trades />
+            <Transactions />
+            <Trades />
           </div>
           <OrderBook />
         </section>
       </main>
-
-      {/* Alert */}
     </div>
   );
 }

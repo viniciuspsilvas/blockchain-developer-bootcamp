@@ -126,11 +126,11 @@ export const selectOrderBook = createSelector(
     const groupedOrders = groupBy(decoratedOrders, "orderType");
 
     const buyOrders = get(groupedOrders, "buy", []).sort(
-      // TODO: Check if this is correct, should it be from ether lib. BigNumber? 
+      // TODO: Check if this is correct, should it be from ether lib. BigNumber?
       (a, b) => Number(b.tokenPrice) - Number(a.tokenPrice)
     );
     const sellOrders = get(groupedOrders, "sell", []).sort(
-      // TODO: Check if this is correct, should it be from ether lib. BigNumber? 
+      // TODO: Check if this is correct, should it be from ether lib. BigNumber?
       (a, b) => Number(b.tokenPrice) - Number(a.tokenPrice)
     );
 
@@ -421,4 +421,12 @@ const decorateMyFilledOrder = (
     orderFillAction: orderType === "buy" ? "sell" : "buy",
     orderSign: orderType === "buy" ? "+" : "-"
   };
+};
+
+// ------------------------------------------------------------------------------
+// MY EVENTS
+
+export const myEventsSelector = (state: RootState) => {
+  const account = selectAccount(state);
+  return state.exchange.events.filter((event) => event.user === account);
 };
