@@ -59,6 +59,7 @@ export const Transactions: FC = () => {
                         width={16}
                         height={16}
                         className="inline-block ml-2"
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     </th>
                     <th className="text-right">
@@ -69,6 +70,7 @@ export const Transactions: FC = () => {
                         width={16}
                         height={16}
                         className="inline-block ml-2"
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     </th>
                     <th />
@@ -119,6 +121,7 @@ export const Transactions: FC = () => {
                         width={16}
                         height={16}
                         className="inline-block ml-2"
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     </th>
                     <th>
@@ -129,6 +132,7 @@ export const Transactions: FC = () => {
                         width={16}
                         height={16}
                         className="inline-block ml-2"
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     </th>
                     <th>
@@ -139,6 +143,7 @@ export const Transactions: FC = () => {
                         width={16}
                         height={16}
                         className="inline-block ml-2"
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     </th>
                   </tr>

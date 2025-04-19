@@ -185,6 +185,7 @@ export const Balance: FC = () => {
               width={20}
               height={20}
               className="inline-block mr-2"
+              style={{ width: 'auto', height: 'auto' }}
             />
             {symbols && symbols[0]}
           </p>
@@ -243,6 +244,7 @@ export const Balance: FC = () => {
               width={20}
               height={20}
               className="inline-block mr-2"
+              style={{ width: 'auto', height: 'auto' }}
             />
             {symbols && symbols[1]}
           </p>

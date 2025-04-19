@@ -23,9 +23,9 @@ export const PriceChart: FC = () => {
           {priceChart && (
             <div className="flex items-center gap-2">
               {priceChart.lastPriceChange === "+" ? (
-                <Image src={arrowUp} alt="Arrow up" width={60} height={60} />
+                <Image src={arrowUp} alt="Arrow up" width={60} height={60} style={{ width: 'auto', height: 'auto' }} />
               ) : (
-                <Image src={arrowDown} alt="Arrow down" width={60} height={60} />
+                <Image src={arrowDown} alt="Arrow down" width={60} height={60} style={{ width: 'auto', height: 'auto' }} />
               )}
               <span className="up">{priceChart.lastPrice}</span>
             </div>

@@ -56,6 +56,7 @@ export const Trades: FC = () => {
                     width={16}
                     height={16}
                     className="inline-block ml-2"
+                    style={{ width: 'auto', height: 'auto' }}
                   />
                 </th>
                 <th className="text-right">
@@ -66,6 +67,7 @@ export const Trades: FC = () => {
                     width={16}
                     height={16}
                     className="inline-block ml-2"
+                    style={{ width: 'auto', height: 'auto' }}
                   />
                 </th>
                 <th className="text-right">
@@ -76,6 +78,7 @@ export const Trades: FC = () => {
                     width={16}
                     height={16}
                     className="inline-block ml-2"
+                    style={{ width: 'auto', height: 'auto' }}
                   />
                 </th>
               </tr>
