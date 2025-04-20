@@ -1,0 +1,20 @@
+# Test files
+test/
+scripts/
+contracts/
+cache/
+artifacts/
+typechain-types/
+
+# Environment files
+.env
+.env.*
+
+# Hardhat files
+hardhat.config.ts
+nodemon.json
+
+# Other
+.DS_Store
+.git
+.gitignore 
