@@ -11,7 +11,9 @@
     "test:watch": "nodemon",
     "hardhat:node": "npx hardhat node",
     "hardhat:deploy": "npx hardhat run --network localhost scripts/1_deploy.ts",
-    "hardhat:seed": "npx hardhat run --network localhost scripts/2_seed-exchange.ts"
+    "hardhat:deploy:sepolia": "npx hardhat run scripts/1_deploy.ts --network sepolia --show-stack-traces",
+    "hardhat:seed": "npx hardhat run --network localhost scripts/2_seed-exchange.ts",
+    "hardhat:seed:sepolia": "npx hardhat run --network sepolia scripts/2_seed-exchange.ts"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.1",

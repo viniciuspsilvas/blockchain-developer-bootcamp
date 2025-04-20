@@ -77,7 +77,7 @@ export const Navbar: FC = () => {
             Select Network
           </option>
           <option value="0x7A69">Localhost</option>
-          <option value="0x2a">Kovan</option>
+          <option value="0xaa36a7">Sepolia</option>
         </select>
       </div>
 
