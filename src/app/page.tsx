@@ -2,7 +2,7 @@
 
 import { Contract, ethers } from "ethers";
 import TOKEN_ABI from "../abis/Token.json";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch } from "../lib/hooks";
 import { useIsClient } from "../lib/hooks/useIsClient";
 import {
@@ -33,6 +33,7 @@ import { PriceChart } from "../components/priceChart";
 import { Trades } from "../components/trades";
 import { Transactions } from "../components/transactions";
 import { Alert } from "../components/alert";
+import { HamburgerMenu } from "../components/hamburgerMenu";
 
 declare global {
   interface Window {
@@ -56,6 +57,7 @@ const configData: ConfigType = configDataJson;
 export default function Home() {
   const dispatch = useAppDispatch();
   const isClient = useIsClient();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isClient && typeof window === "undefined") return;
@@ -230,18 +232,29 @@ export default function Home() {
     <div className="min-h-screen font-dm-sans text-white bg-primary">
       <Navbar />
       <Alert />
+      <HamburgerMenu isOpen={isMenuOpen} toggleMenu={() => setIsMenuOpen(!isMenuOpen)} />
 
-      <main className="grid grid-cols-12">
+      {/* Overlay */}
+      <div 
+        className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300 ${
+          isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        } md:hidden`}
+        onClick={() => setIsMenuOpen(false)}
+      />
+
+      <main className="grid grid-cols-1 md:grid-cols-12">
         {/* Left Section */}
-        <section className="grid bg-secondary p-8 col-span-3">
+        <section className={`fixed md:relative transform transition-transform duration-300 ease-in-out ${
+          isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0 bg-secondary p-4 md:p-8 md:col-span-3 space-y-4 md:space-y-8 h-[100dvh] md:h-auto w-full md:w-auto z-40 overflow-y-auto shadow-xl md:shadow-none top-0 left-0 pt-16 md:pt-4`}>
           <Markets />
           <Balance />
           <Order />
         </section>
         {/* Right Section */}
-        <section className="grid bg-primary p-8 col-span-9 gap-8">
+        <section className="grid bg-primary p-4 md:p-8 md:col-span-9 gap-4 md:gap-8">
           <PriceChart />
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             <Transactions />
             <Trades />
           </div>

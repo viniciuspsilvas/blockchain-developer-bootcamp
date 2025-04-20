@@ -46,8 +46,8 @@ export const Navbar: FC = () => {
   };
 
   return (
-    <div className="h-[10vh] relative grid grid-cols-12">
-      <div className="bg-secondary px-8 col-span-3 flex items-center">
+    <div className="h-auto md:h-[10vh] relative grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-0 p-4 md:p-0">
+      <div className="bg-secondary px-4 md:px-8 col-span-1 md:col-span-3 flex items-center justify-center md:justify-start">
         <Image
           src={logo}
           alt="DApp Logo"
@@ -56,10 +56,10 @@ export const Navbar: FC = () => {
           className="mr-2"
           style={{ width: 'auto', height: 'auto' }}
         />
-        <h1>DApp Token Exchange</h1>
+        <h1 className="text-center md:text-left">DApp Token Exchange</h1>
       </div>
 
-      <div className="flex items-center p-4">
+      <div className="flex items-center justify-center md:justify-start p-2 md:p-4">
         <Image
           src={eth}
           alt="ETH Logo"
@@ -72,7 +72,7 @@ export const Navbar: FC = () => {
         <select
           name="networks"
           id="networks"
-          className=" bg-transparent text-white px-2 py-1 rounded-md"
+          className="bg-transparent text-white px-2 py-1 rounded-md w-full md:w-auto"
           value={`0x${parseInt(chainId).toString(16)}`}
           onChange={networkHandler}
         >
@@ -84,17 +84,17 @@ export const Navbar: FC = () => {
         </select>
       </div>
 
-      <div className="flex pl-3 items-center justify-between rounded-lg bg-secondary absolute top-1/2 right-6 translate-y-[-50%] w-[400px] ">
+      <div className="flex flex-col md:flex-row items-center justify-center md:justify-between rounded-lg bg-secondary md:absolute md:top-1/2 md:right-6 md:translate-y-[-50%] w-full md:w-[400px] p-4 md:p-0">
         {balance
-          ? <p className="flex h-full justify-center items-center gap-4">
-              <small className="small  text-neutral">My Balance</small>
+          ? <p className="flex h-full justify-center items-center gap-4 mb-4 md:mb-0">
+              <small className="small text-neutral">My Balance</small>
               {Number(balance).toFixed(4)} ETH
             </p>
-          : <p>
-              <small className="small  text-neutral">My Balance</small> 0 ETH
+          : <p className="mb-4 md:mb-0">
+              <small className="small text-neutral">My Balance</small> 0 ETH
             </p>}
 
-        <div className="bg-slate-800 h-full py-3 p-3 rounded-lg">
+        <div className="bg-slate-800 w-full md:w-auto h-full py-3 p-3 rounded-lg">
           {account
             ? <a
                 href={

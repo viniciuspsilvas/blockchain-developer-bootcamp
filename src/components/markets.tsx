@@ -57,33 +57,37 @@ export const Markets: FC = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <div className="mb-2">
-        <h2>Select Market</h2>
+        <h2 className="text-lg font-semibold">Select Market</h2>
       </div>
 
       {chainId !== "0" && config[chainId]
-        ? <select
-            name="markets"
-            id="markets"
-            onChange={marketHandler}
-            className="border border-gray-500 bg-primary text-white p-2 rounded-md w-full"
-          >
-            <option
-              value={`${config[chainId].DApp.address},${config[chainId].mETH
-                .address}`}
+        ? <div className="w-full">
+            <select
+              name="markets"
+              id="markets"
+              onChange={marketHandler}
+              className="border border-gray-500 bg-primary text-white p-2 rounded-md w-full max-w-full truncate"
             >
-              DApp / mETH
-            </option>
-            <option
-              value={`${config[chainId].DApp.address},${config[chainId].mDAI
-                .address}`}
-            >
-              DApp / mDAI
-            </option>
-          </select>
-        : <div>
-            <p className="p-4">Not Deployed to Network</p>
+              <option
+                value={`${config[chainId].DApp.address},${config[chainId].mETH
+                  .address}`}
+                className="truncate"
+              >
+                DApp / mETH
+              </option>
+              <option
+                value={`${config[chainId].DApp.address},${config[chainId].mDAI
+                  .address}`}
+                className="truncate"
+              >
+                DApp / mDAI
+              </option>
+            </select>
+          </div>
+        : <div className="w-full">
+            <p className="p-4 text-gray-400">Not Deployed to Network</p>
           </div>}
 
       <hr className="border-gray-800 my-8" />
