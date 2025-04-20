@@ -8,11 +8,14 @@ import {
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 
 import { ethers } from "ethers";
-import { config } from "../app/page";
+import configDataJson from "../config.json";
 import Blockies from "react-blockies";
 import Image from "next/image";
 import logo from "../assets/logo.png";
 import eth from "../assets/eth.svg";
+import { ConfigType } from "../app/page";
+
+const configData: ConfigType = configDataJson;
 
 export const Navbar: FC = () => {
   const dispatch = useAppDispatch();
@@ -95,8 +98,8 @@ export const Navbar: FC = () => {
           {account
             ? <a
                 href={
-                  config[chainId]
-                    ? `${config[chainId].explorerURL}/address/${account}`
+                  configData[chainId]
+                    ? `${configData[chainId].explorerURL}/address/${account}`
                     : `#`
                 }
                 target="_blank"

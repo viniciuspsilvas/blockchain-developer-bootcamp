@@ -21,7 +21,7 @@ import {
 } from "../lib/features/exchanges/exchangeSlice";
 import { filterAndMapEvents } from "../lib/utils/eventMappers";
 
-import configData from "../config.json";
+import configDataJson from "../config.json";
 import { Navbar } from "../components/navbar";
 import { Markets } from "../components/markets";
 import { Balance } from "../components/balance";
@@ -50,7 +50,7 @@ export type ConfigType = {
   };
 };
 
-export const config: ConfigType = configData;
+const configData: ConfigType = configDataJson;
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -87,8 +87,8 @@ export default function Home() {
 
         // Store only token addresses & symbols in Redux
         const tokenAddresses = [
-          config[chainId].DApp.address,
-          config[chainId].mETH.address
+          configData[chainId].DApp.address,
+          configData[chainId].mETH.address
         ];
 
         const DAppToken = new ethers.Contract(
@@ -112,7 +112,7 @@ export default function Home() {
         );
 
         // Store exchange address in Redux
-        const exchangeAddress = config[chainId].exchange.address;
+        const exchangeAddress = configData[chainId].exchange.address;
         const exchange = new Contract(exchangeAddress, EXCHANGE_ABI, provider);
 
         dispatch(loadExchange({ address: exchangeAddress }));
