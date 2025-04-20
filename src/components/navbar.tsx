@@ -84,7 +84,7 @@ export const Navbar: FC = () => {
         </select>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-center md:justify-between rounded-lg bg-secondary md:absolute md:top-1/2 md:right-6 md:translate-y-[-50%] w-full md:w-[400px] p-4 md:p-0">
+      <div className="flex flex-col md:flex-row items-center justify-center md:justify-between rounded-lg bg-secondary md:absolute md:top-1/2 md:right-6 md:translate-y-[-50%] w-full md:w-[400px] p-4 md:p-0 md:pl-4">
         {balance
           ? <p className="flex h-full justify-center items-center gap-4 mb-4 md:mb-0">
               <small className="small text-neutral">My Balance</small>

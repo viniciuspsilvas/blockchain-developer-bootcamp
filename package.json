@@ -19,6 +19,7 @@
     "@reduxjs/toolkit": "^2.5.1",
     "apexcharts": "^3.35.0",
     "dotenv": "^16.4.7",
+    "framer-motion": "^12.7.4",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "next": "15.1.4",

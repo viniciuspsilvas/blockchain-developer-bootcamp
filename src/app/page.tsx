@@ -5,6 +5,16 @@ import TOKEN_ABI from "../abis/Token.json";
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "../lib/hooks";
 import { useIsClient } from "../lib/hooks/useIsClient";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  fadeIn,
+  slideInFromRight,
+  slideInFromBottom,
+  chartAnimation,
+  ordersAnimation,
+  tradesAnimation,
+  orderBookAnimation
+} from "../lib/animations";
 import {
   loadAccount,
   loadBalance,
@@ -58,6 +68,24 @@ export default function Home() {
   const dispatch = useAppDispatch();
   const isClient = useIsClient();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMenuOpen(true);
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!isClient && typeof window === "undefined") return;
@@ -229,38 +257,80 @@ export default function Home() {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen font-dm-sans text-white bg-primary">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      className="min-h-screen font-dm-sans text-white bg-primary"
+    >
       <Navbar />
       <Alert />
-      <HamburgerMenu isOpen={isMenuOpen} toggleMenu={() => setIsMenuOpen(!isMenuOpen)} />
+      <HamburgerMenu
+        isOpen={isMenuOpen}
+        toggleMenu={() => setIsMenuOpen(!isMenuOpen)}
+      />
 
       {/* Overlay */}
-      <div 
-        className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300 ${
-          isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        } md:hidden`}
-        onClick={() => setIsMenuOpen(false)}
-      />
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            onClick={() => setIsMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       <main className="grid grid-cols-1 md:grid-cols-12">
         {/* Left Section */}
-        <section className={`fixed md:relative transform transition-transform duration-300 ease-in-out ${
-          isMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 bg-secondary p-4 md:p-8 md:col-span-3 space-y-4 md:space-y-8 h-[100dvh] md:h-auto w-full md:w-auto z-40 overflow-y-auto shadow-xl md:shadow-none top-0 left-0 pt-16 md:pt-4`}>
-          <Markets />
-          <Balance />
-          <Order />
-        </section>
+        <motion.section
+          initial={{ x: '-100%' }}
+          animate={{ 
+            x: isMenuOpen ? 0 : '-100%',
+            transition: {
+              type: "spring",
+              stiffness: 100,
+              damping: 15
+            }
+          }}
+          className={`fixed md:relative bg-secondary p-4 md:p-8 md:col-span-3 space-y-4 md:space-y-8 h-[100dvh] md:h-auto w-full md:w-auto z-40 overflow-y-auto shadow-xl md:shadow-none top-0 left-0 pt-16 md:pt-4`}
+        >
+          <motion.div variants={fadeIn}>
+            <Markets />
+          </motion.div>
+          <motion.div variants={fadeIn}>
+            <Balance />
+          </motion.div>
+          <motion.div variants={fadeIn}>
+            <Order />
+          </motion.div>
+        </motion.section>
+
         {/* Right Section */}
-        <section className="grid bg-primary p-4 md:p-8 md:col-span-9 gap-4 md:gap-8">
-          <PriceChart />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            <Transactions />
-            <Trades />
-          </div>
-          <OrderBook />
-        </section>
+        <motion.section
+          variants={slideInFromRight}
+          className="grid bg-primary p-4 md:p-8 md:col-span-9 gap-4 md:gap-8"
+        >
+          <motion.div variants={chartAnimation}>
+            <PriceChart />
+          </motion.div>
+          <motion.div
+            variants={slideInFromBottom}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8"
+          >
+            <motion.div variants={ordersAnimation}>
+              <Transactions />
+            </motion.div>
+            <motion.div variants={tradesAnimation}>
+              <Trades />
+            </motion.div>
+          </motion.div>
+          <motion.div variants={orderBookAnimation}>
+            <OrderBook />
+          </motion.div>
+        </motion.section>
       </main>
-    </div>
+    </motion.div>
   );
 }
