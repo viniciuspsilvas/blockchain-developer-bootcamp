@@ -87,6 +87,7 @@ export const Balance: FC = () => {
     };
 
     loadBalances();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, tokenAddresses, transferInProgress]); // Removed exchange and tokens from dependencies
 
   if (!tokenAddresses?.length || !exchange || !account || !tokens?.length) {

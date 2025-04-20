@@ -4,6 +4,7 @@ import { Contract, ethers } from "ethers";
 import TOKEN_ABI from "../abis/Token.json";
 import { useEffect } from "react";
 import { useAppDispatch } from "../lib/hooks";
+import { useIsClient } from "../lib/hooks/useIsClient";
 import {
   loadAccount,
   loadBalance,
@@ -54,9 +55,10 @@ const configData: ConfigType = configDataJson;
 
 export default function Home() {
   const dispatch = useAppDispatch();
+  const isClient = useIsClient();
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isClient && typeof window === "undefined") return;
 
     const loadBlockchainData = async () => {
       try {

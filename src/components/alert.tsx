@@ -1,4 +1,6 @@
-import { FC, useEffect, useState } from "react";
+"use client";
+
+import { FC, useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectAccount,
@@ -29,6 +31,8 @@ export const Alert: FC = () => {
   const autoClose = useSelector(selectAutoClose);
   const dispatch = useDispatch();
 
+  const latestEventId = events[0]?.id;
+
   // Show alert when there's a new event
   useEffect(() => {
     const shouldShowAlert = (events[0] || isPending || isError) && account;
@@ -36,14 +40,12 @@ export const Alert: FC = () => {
       setIsVisible(true);
       setCountdown(5);
     }
-  }, [events[0]?.id, isPending, isError, account]);
+  }, [latestEventId, isPending, isError, account, events]);
 
   // Handle countdown
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
+  const handleCountdown = useCallback(() => {
     if (isVisible && autoClose && events[0]) {
-      timer = setInterval(() => {
+      const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
             setIsVisible(false);
@@ -52,12 +54,14 @@ export const Alert: FC = () => {
           return prev - 1;
         });
       }, 1000);
-    }
 
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [isVisible, autoClose, events[0]]);
+      return () => clearInterval(timer);
+    }
+  }, [isVisible, autoClose, events]);
+
+  useEffect(() => {
+    return handleCountdown();
+  }, [handleCountdown]);
 
   if (!isVisible) return null;
 

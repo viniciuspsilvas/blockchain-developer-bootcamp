@@ -1,3 +1,5 @@
+"use client";
+
 import { Contract, ethers } from "ethers";
 import { useAppSelector, useAppDispatch } from "../hooks";
 import {

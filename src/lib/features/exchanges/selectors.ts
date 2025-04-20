@@ -426,7 +426,9 @@ const decorateMyFilledOrder = (
 // ------------------------------------------------------------------------------
 // MY EVENTS
 
-export const myEventsSelector = (state: RootState) => {
-  const account = selectAccount(state);
-  return state.exchange.events.filter((event) => event.user === account);
-};
+export const selectEvents = (state: RootState) => state.exchange.events;
+
+export const myEventsSelector = createSelector(
+  [selectEvents, selectAccount],
+  (events, account) => events.filter((event) => event.user === account)
+);

@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {

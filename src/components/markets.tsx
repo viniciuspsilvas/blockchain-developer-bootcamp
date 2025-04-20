@@ -1,3 +1,5 @@
+"use client";
+
 import { FC } from "react";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 import { loadTokens } from "../lib/features/tokens/tokensSlice";

@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, useState } from "react";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import { useTokens } from "../lib/hooks/useTokens";
