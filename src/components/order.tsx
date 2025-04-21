@@ -44,7 +44,7 @@ export const Order: FC = () => {
 
   return (
     <div className="bg-secondary rounded-md p-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
         <h2 className="text-lg font-medium">New Order</h2>
         <ToggleButtonGroup
           options={["Buy", "Sell"]}

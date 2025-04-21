@@ -165,7 +165,7 @@ export const Balance: FC = () => {
 
   return (
     <div className="bg-secondary rounded-md">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
         <h2 className="text-lg font-medium">Balance</h2>
         <ToggleButtonGroup
           options={["Deposit", "Withdraw"]}
