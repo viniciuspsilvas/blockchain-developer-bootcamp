@@ -178,7 +178,7 @@ export const Balance: FC = () => {
       <div className="mb-4">
         <div className="flex justify-between items-center p-4  rounded-md">
           <p className="text-sm">
-            <small className="text-neutral">Token2</small>
+            <small className="text-neutral">Token</small>
             <br />
             <Image
               src={dapp}
@@ -237,7 +237,7 @@ export const Balance: FC = () => {
       <div className="mb-4">
         <div className="flex justify-between items-center p-4  rounded-md">
           <p className="text-sm">
-            <small className="text-neutral">Token3</small>
+            <small className="text-neutral">Token</small>
             <br />
             <Image
               src={eth}
